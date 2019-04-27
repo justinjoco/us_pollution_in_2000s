@@ -1,3 +1,4 @@
+// us map
 var draw = async function(){
     var mapSvg = d3.select('svg#map')
     .attr("width",600)
@@ -23,3 +24,16 @@ var draw = async function(){
 }
 
 draw();
+
+// page jump
+var part4= document.getElementById('part4chart');
+var btns = document.querySelectorAll('.btn');
+let textarea =  document.getElementById("output");
+
+for(let i=0;i<btns.length;i++){
+    btns[i].onclick = ()=>{
+        part4.scrollIntoView();
+        let msg = btns[i].innerHTML;
+        textarea.innerHTML=msg;
+    }
+}
