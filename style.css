@@ -14,3 +14,13 @@
     pointer-events: none;
     transform: scale(0.6);
 }
+
+.track {
+    stroke: #777;
+    stroke-opacity: .2;
+    stroke-width: 5;
+}
+
+.slider-from, .slider-to {
+    cursor: pointer;  
+}
