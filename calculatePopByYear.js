@@ -11,3 +11,5 @@ const states = ['AL','AK','AS','AZ','AR','CA','CO','CT','DE','DC','FL','GA','GU'
 
     }
     console.log(JSON.stringify(popByYear))
+
+

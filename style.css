@@ -1,3 +1,6 @@
+body{
+    margin: 0;
+}
 .state:hover {
     fill: red;
 }
@@ -23,4 +26,25 @@
 
 .slider-from, .slider-to {
     cursor: pointer;  
+}
+
+.pollutant{
+    display: inline-block;
+    cursor: pointer;
+    padding: 0 10px;
+    margin: 0 10px;
+    border: 1px solid rgb(152, 200, 219);
+    height: 1em;
+}
+
+.pollutant-buttons{
+    position: sticky;
+    top: 0;
+    padding: 20px;
+}
+.pollutant-description{
+    
+}
+.pollutant-unit{
+    color: rgb(177, 177, 177);
 }
