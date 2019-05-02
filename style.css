@@ -1,3 +1,11 @@
+h1{
+    font-family: Corbel;
+    color: #4F342A;
+}
+text{
+    font-family: Corbel;
+    color: #4F342A;
+}
 body{
     margin: 0;
     color: #826c64;
@@ -10,7 +18,7 @@ body{
 .states{
     transform: scale(0.6);
 }
-  
+
 .state-borders {
     fill: none;
     stroke: #fff;
@@ -21,6 +29,17 @@ body{
     transform: scale(0.6);
 }
 
+.stateinfo{
+    font-family: Corbel;
+    color: #4F342A;
+    font-weight: bold;
+}
+
+.selectpollutant{
+    font-family: Corbel;
+    color: #4F342A;
+    font-weight: bold;
+}
 .track {
     stroke: #D8D8D8;
     stroke-width: 5;
