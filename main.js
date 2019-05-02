@@ -54,7 +54,63 @@ var draw = async function(){
         55:	"WI",
         56:	"WY"
     }
+
+    const abbrToFull = {
+        "AL":"Alabama",
+        "AK": "Alaska",
+        'AZ': "Arizona",
+         'AR': "Arkansas",
+        'CA': "California",
+        'CO': "Colorado",
+        'CT': "Connecticut",
+        'DE': "Delaware",
+        'DC': "Washington, DC",
+        'FL': "Florida",
+        'GA': "Georgia",
+        'HI': "Hawaii",
+        'ID': "Idaho",
+        'IL':"Illinois",
+        'IA': "Iowa",
+        'IN': "Indiana",
+        'KS': "Kansas",
+        'KY': "Kentucky",
+        'LA': "Louisiana",
+        'ME': "Maine",
+        'MD':"Maryland",
+        'MA': "Massachusetts",
+        'MI': "Michigan",
+        'MN':"Minnesota",
+        'MS': "Mississippi",
+        'MO': "Missouri",
+        'MT': "Montana",
+        'NE': "Nebraska",
+        'NV': "Nevada",
+        'NH': "New Hampshire",
+        'NJ': "New Jersey",
+        'NM': "Nex Mexico",
+        'NY': "New York",
+        'NC': "North Carolina",
+        'ND': "North Dakota",
+        'OH': "Ohio",
+        'OK': "Oklahoma",
+        'OR': "Oregon",
+        "PA": "Pennsylvania",
+        "RI": "Rhode Island",
+        "SC": "South Carolina",
+        "SD": "South Dakota",
+        "TN": "Tennessee",
+        "TX": "Texas",
+        'UT': "Utah",
+        "VT": "Vermont",
+        "VA": "Virginia",
+        "WA": "Washington",
+        "WV": "West Virginia",
+        "WI": "Wisconsin",
+        "WY": "Wyoming"
+    }
+
     var stateFeatures;
+    var stateHeader = document.getElementById("state");
     async function drawMap(){
         var mapSvg = d3.select('svg#map')
         .attr("width",600)
@@ -89,6 +145,7 @@ var draw = async function(){
         .attr('d',path)
         .on('click',d=>{
             selectedState = idToStates[d.id];
+            stateHeader.innerHTML = abbrToFull[selectedState];
             showSinglePopulation();
         })
         .attr('fill',d=>{
@@ -270,7 +327,7 @@ var draw = async function(){
 var selectedState = "NY";
 var stateNameArea = document.getElementById('selectedState');
 var statePopArea = document.getElementById('statePopulation');
-var yearRange = [2000, 2010];
+var yearRange = [2000, 2016];
 
 draw();
 
