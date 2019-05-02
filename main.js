@@ -236,9 +236,9 @@ let descriptionArea = document.getElementById('description');
 
 const descriptions = [
     'Carbon monoxide (CO) is toxic to animals that use hemoglobin as an oxygen carrier when encountered in concentrations above about 35 ppm',
-    'Nitrogen dioxide (NO2) is ',
-    'Ozone or trioxygen (O3) is',
-    'Sulfur dioxide (SO2) is'];
+    'Nitrogen dioxide (NO2) is an irritant gas, which at high concentrations causes inflammation of the airways.',
+    'Ozone or trioxygen (O3) is an air pollutant that is harmful to breathe and it damages crops, trees and other vegetation.',
+    'Sulfur dioxide (SO2) irritates the nose, throat, and airways to cause coughing, wheezing, shortness of breath, or a tight feeling around the chest.'];
 descriptionArea.innerHTML = descriptions[0];
 
 for(let i=0;i<btns.length;i++){
