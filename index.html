@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>5100FinalProject</title>
+  <title>US Pollution in 2000s</title>
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://d3js.org/topojson.v2.min.js"></script>
   <link rel="stylesheet" type="text/css" href="style.css">
@@ -14,7 +14,7 @@
 
 <body>
   <div style="height:80vh" id="part2map">
-    <center><h1>title</h1></center>
+    <center><h1>US Pollution between 2000 and 2016</h1></center>
     <svg id="yearSlider"></svg>
     <div>
       <div style="display: inline-block;"><svg id="map"></svg></div>
@@ -32,9 +32,14 @@
     <div class="pollutant-description"></div>
   </div>
   <div style="height:20vh"></div>
-  <div style="height:80vh" id="part4chart">
-    <text id="output"></text>
-  </div>
+
+   <div id="bar_chart" align="center">
+    
+    <h2 id="lineHead" style="margin-top: 40px; text-align: center">Amount Chart</h2>
+    <svg id="producerType" height="500" width="1300" style="border:1px solid black"></svg>
+   </div>
+
+  
 
   <script type="text/javascript" src="main.js"></script>
 </body>
