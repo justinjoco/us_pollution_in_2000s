@@ -82,9 +82,9 @@ var draw = async function(){
 
     function drawSlider(){
         const sidePadding = 20;
-        var width = document.body.clientWidth-sidePadding*2, height = 50;
+        var width = document.body.clientWidth-sidePadding*2, height = 80;
         
-        const triangleSize = 20;
+        const triangleSize = 40;
         const offsetX = triangleSize;
         const sqrt3 = Math.sqrt(3)/2;
         
@@ -93,45 +93,24 @@ var draw = async function(){
         .attr('height',height).append('g')
         .attr('transform','translate('+(offsetX+sidePadding)+',0)');
 
-        var triangleLeft = {
-            draw: function(context, size){
-                context.moveTo(-sqrt3*size,0);
-                context.lineTo(0,-size/2);
-                context.lineTo(0,size/2);
-                context.closePath();
-            }
-        }
-
-        var triangleRight = {
-            draw: function(context, size){
-                context.moveTo(sqrt3*size,0);
-                context.lineTo(0,-size/2);
-                context.lineTo(0,size/2);
-                context.closePath();
-            }
-        }
-
-        let leftTrgl = d3.symbol().type(triangleLeft).size(triangleSize);
-        let rightTrgl = d3.symbol().type(triangleRight).size(triangleSize);
-
         let sliderBar = svg.append('line')
         .classed('track',true);
+        let sliderBarMiddle = svg.append('line')
+        .classed('track-middle',true);
 
-        let thumb1 = svg.append('path')
-        .attr('d',rightTrgl)
-        .classed('slider-to',true)
-        .style('stroke','grey')
-        .style('fill', 'white');
+        let thumb1 = svg.append('svg:image');
+        thumb1.attr('xlink:href',"img/arrow.svg")
+        .attr('x',-triangleSize/2).attr('y',-triangleSize/2)
+        .attr('width',triangleSize).attr('height',triangleSize);
         
         let label1 = svg.append('text')
         .text(yearRange[1])
         .style('text-anchor','end');
 
-        let thumb2 = svg.append('path')
-        .attr('d',leftTrgl)
-        .classed('slider-from',true)
-        .style('stroke','grey')
-        .style('fill', 'white')
+        let thumb2 = svg.append('svg:image')
+        thumb2.attr('xlink:href',"img/arrow.svg")
+        .attr('x',-triangleSize/2).attr('y',-triangleSize/2)
+        .attr('width',triangleSize).attr('height',triangleSize);
         
         let label2 = svg.append('text')
         .text(yearRange[0])
@@ -151,8 +130,13 @@ var draw = async function(){
             .attr('y1',triangleSize/2)
             .attr('y2',triangleSize/2);
 
+            sliderBarMiddle.attr('x1',xScale.range()[0])
+            .attr('x2',xScale.range()[1])
+            .attr('y1',triangleSize/2)
+            .attr('y2',triangleSize/2);
+
             
-            moveThumb(thumb1,label1,yearRange[1]);
+            moveThumb(thumb1,label1,yearRange[1],1);
             moveThumb(thumb2,label2,yearRange[0]);
 
             thumb1.call(d3.drag()
@@ -164,7 +148,7 @@ var draw = async function(){
                     let xFrom = Number(thumb2.attr('transform').split('translate(')[1].split(',')[0]);
                     if(xFrom>xScale.range()[1])return;
                     let x = xScale.invert(d3.event.x);
-                    moveThumb(thumb1,label1,x);
+                    moveThumb(thumb1,label1,x,1);
                     yearRange[1] = Math.floor(x);
                     if(xFrom>xTo){
                         moveThumb(thumb2,label2,x);
@@ -187,16 +171,22 @@ var draw = async function(){
                     moveThumb(thumb2,label2,x);
                     yearRange[0] = Math.floor(x);
                     if(xFrom>xTo){
-                        moveThumb(thumb1,label1,x);
+                        moveThumb(thumb1,label1,x,1);
                         yearRange[1] = yearRange[0];
                     }
                     showPopulation();
                 })
             );
 
-            function moveThumb(thumb,label,x){
-                thumb.attr('transform','translate('+xScale(x)+','+triangleSize/2+')');
-                label.attr('transform','translate('+xScale(x)+','+2*triangleSize+')').text(parseInt(x));
+            function moveThumb(thumb,label,x, isRight){
+                thumb.attr('transform','translate('+xScale(x)+','+triangleSize/2+') '+(isRight?" rotate(180)":""));
+                label.attr('transform','translate('+xScale(x)+','+triangleSize*3/2+')').text(parseInt(x));
+                if(isRight){
+                    sliderBarMiddle
+                    .attr('x2',xScale(x));
+                }else{
+                    sliderBarMiddle.attr('x1',xScale(x));
+                }
             }
 
         }

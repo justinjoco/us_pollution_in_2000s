@@ -19,9 +19,13 @@ body{
 }
 
 .track {
-    stroke: #777;
-    stroke-opacity: .2;
+    stroke: #D8D8D8;
     stroke-width: 5;
+}
+.track-middle{
+    stroke: #59CDA6;
+    stroke-opacity: 0.5;
+    stroke-width: 25px;
 }
 
 .slider-from, .slider-to {
