@@ -1,83 +1,108 @@
 // us map
 
 var draw = async function(){
-
+    const idToStates = {
+        "01": "AL",
+        "02": 'AK',
+        "04": 'AZ',
+        "05": 'AR',
+        "06": 'CA',
+        "08": 'CO',
+        "09": 'CT',
+        10: 'DE',
+        11: 'DC',
+        12: 'FL',
+        13: 'GA',
+        15: 'HI',
+        16: 'ID',
+        17: 'IL',
+        19: 'IA',
+        18: 'IN',
+        20:	'KS',
+        21:	'KY',
+        22:	'LA',
+        23:	'ME',
+        24:	'MD',
+        25:	'MA',
+        26:	'MI',
+        27:	'MN',
+        28:	'MS',
+        29:	'MO',
+        30:	'MT',
+        31:	'NE',
+        32:	'NV',
+        33:	'NH',
+        34:	'NJ',
+        35:	'NM',
+        36:	'NY',
+        37:	'NC',
+        38:	'ND',
+        39:	'OH',
+        40:	'OK',
+        41:	'OR',
+        42:	"PA",
+        44:	"RI",
+        45:	"SC",
+        46:	"SD",
+        47:	"TN",
+        48:	"TX",
+        49:'UT',
+        50:	"VT",
+        51:	"VA",
+        53:	"WA",
+        54:	"WV",
+        55:	"WI",
+        56:	"WY"
+    }
+    var stateFeatures;
     async function drawMap(){
-        const idToStates = {
-            "01": "AL",
-            "02": 'AK',
-            "04": 'AZ',
-            "05": 'AR',
-            "06": 'CA',
-            "08": 'CO',
-            "09": 'CT',
-            10: 'DE',
-            12: 'FL',
-            13: 'GA',
-            15: 'HI',
-            16: 'ID',
-            17: 'IL',
-            19: 'IA',
-            18: 'IN',
-            20:	'KS',
-            21:	'KY',
-            22:	'LA',
-            23:	'ME',
-            24:	'MD',
-            25:	'MA',
-            26:	'MI',
-            27:	'MN',
-            28:	'MS',
-            29:	'MO',
-            30:	'MT',
-            31:	'NE',
-            32:	'NV',
-            33:	'NH',
-            34:	'NJ',
-            35:	'NM',
-            36:	'NY',
-            37:	'NC',
-            38:	'ND',
-            39:	'OH',
-            40:	'OK',
-            41:	'OR',
-            42:	"PA",
-            44:	"RI",
-            45:	"SC",
-            46:	"SD",
-            47:	"TN",
-            48:	"TX",
-            49:'UT',
-            50:	"VT",
-            51:	"VA",
-            53:	"WA",
-            54:	"WV",
-            55:	"WI",
-            56:	"WY"
-        }
         var mapSvg = d3.select('svg#map')
         .attr("width",600)
         .attr('height',400);
         var path = d3.geoPath();
 
         var us = await d3.json('us-10m.v1.json');
-
-        mapSvg.append('g')
+        stateFeatures = topojson.feature(us,us.objects.states).features;
+        updatePopulation()
+        var colorScale = d3.scaleDiverging()
+        .domain([Math.min(...stateFeatures.map(s=>s.population))-1,
+        Math.max(...stateFeatures.map(s=>s.population))+1])
+        .interpolator(t=>{
+            return d3.rgb(214*t+249*(1-t), 110*t+195*(1-t), 67*t+11*(1-t));
+        })
+        var update = mapSvg.append('g')
         .attr('class','states')
         .selectAll('path')
-        .data(topojson.feature(us,us.objects.states).features)
-        .enter().append('path')
+        .data(stateFeatures);
+
+        var enter = update.enter();
+        var updateFn = ()=>{
+            update.attr('fill',d=>{
+                
+                return colorScale(d.population)
+            });
+        }
+        updateFn();
+        
+        enter.append('path')
         .attr('class','state')
         .attr('d',path)
         .on('click',d=>{
             selectedState = idToStates[d.id];
-            // console.log(d.id)
-            showPopulation();
+            showSinglePopulation();
+        })
+        .attr('fill',d=>{
+            return colorScale(d.population)
         });
 
         mapSvg.append('path')
         .attr('class','state-borders')
         .attr('d',path(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; })));
+
+        return {
+            update,
+            updateFn
+        };
     }
 
     function drawSlider(){
@@ -154,7 +179,10 @@ var draw = async function(){
                         moveThumb(thumb2,label2,x);
                         yearRange[0] = yearRange[1];
                     }
-                    showPopulation()
+                    updatePopulation();
+                    mapDraw.update.data(stateFeatures);
+                    mapDraw.updateFn();
+                    showSinglePopulation()
                 })
             );
 
@@ -174,7 +202,10 @@ var draw = async function(){
                         moveThumb(thumb1,label1,x,1);
                         yearRange[1] = yearRange[0];
                     }
-                    showPopulation();
+                    updatePopulation();
+                    mapDraw.update.data(stateFeatures);
+                    mapDraw.updateFn();
+                    showSinglePopulation();
                 })
             );
 
@@ -209,16 +240,31 @@ var draw = async function(){
         return pop===0?'NA':Math.floor(pop/nYear);
     }
 
-    function showPopulation(){
+    function updatePopulation(){
+        for(let i=0;i<stateFeatures.length;i++){
+            let state = idToStates[stateFeatures[i].id]
+            let pop = calcAvgPop(yearRange, state);
+            if(pop!==stateFeatures[i].population){
+                let newElem = {};
+                for(let key in stateFeatures[i]){
+                    newElem[key] = stateFeatures[i][key];
+                }
+                newElem.population = pop;
+                stateFeatures[i] = newElem;
+            }
+                
+        }
+    }
+
+    function showSinglePopulation(){
         stateNameArea.innerHTML = selectedState;
-        statePopArea.innerHTML = calcAvgPop(yearRange, selectedState);
     }
     
     let popByYear = await d3.json('pop_by_year.json');
-    drawMap();
-    drawSlider();
-    showPopulation();
     
+    var mapDraw = await drawMap();
+    drawSlider();
+    showSinglePopulation();
 }
 
 var selectedState = "NY";
@@ -229,25 +275,34 @@ var yearRange = [2000, 2010];
 draw();
 
 // page jump
-var part4= document.getElementById('part4chart');
+var part1 =document.getElementById('part2map');
+var part2= document.getElementById('part4chart');
 var btns = document.querySelectorAll('.pollutant');
 let textarea =  document.getElementById("output");
-let descriptionArea = document.getElementById('description');
+var banner = document.querySelector('.pollutant-buttons-banner');
+let backBtn = document.querySelector('#back');
 
 const descriptions = [
     'Carbon monoxide (CO) is toxic to animals that use hemoglobin as an oxygen carrier when encountered in concentrations above about 35 ppm',
     'Nitrogen dioxide (NO2) is ',
     'Ozone or trioxygen (O3) is',
     'Sulfur dioxide (SO2) is'];
-descriptionArea.innerHTML = descriptions[0];
 
 for(let i=0;i<btns.length;i++){
     btns[i].onclick = ()=>{
-        part4.scrollIntoView({behavior: "smooth"});
+        part2.scrollIntoView({behavior: "smooth"});
+        banner.style.opacity = 1;
+        banner.style.delay = 'opacity 2s'
+        banner.style.transition = 'opacity 1s'
         let msg = btns[i].innerHTML;
         textarea.innerHTML=msg;
     }
     btns[i].onmouseover = ()=>{
-        descriptionArea.innerHTML = descriptions[i];
+        
     }
+}
+
+backBtn.onclick = ()=>{
+    part1.scrollIntoView({behavior: "smooth"});
+    banner.style.opacity = 0;
 }

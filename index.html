@@ -13,26 +13,29 @@
 </header>
 
 <body>
-  <div style="height:80vh" id="part2map">
-    <center><h1>title</h1></center>
+  <div style="height:100vh" id="part2map">
+    <center><h1>US Population V.S. Pollution in 2000s</h1></center>
     <svg id="yearSlider"></svg>
-    <div>
-      <div style="display: inline-block;"><svg id="map"></svg></div>
-      <div style="display: inline-block;">Average population for <span id="selectedState"></span> is <span id="statePopulation"></span></div>
+    <div class="row">
+      <div><svg id="map"></svg></div>
+      <div>
+        <h2>Choose a pollutant</h2>
+        <div class="row"><div class="pollutant">CO</div><div class="pollutant-description">ppm sdaasda sdasdsadas dasdasdas dasda sdasd adasda sdasda</div></div>
+        <div class="row"><div class="pollutant">NO2</div><div class="pollutant-description">ppb sdaa dasdasdsa dasdas dasdasdasdas dasdada sdasdasda</div></div>
+        <div class="row"><div class="pollutant">O3</div><div class="pollutant-description">ppm sdaasdasda sdsadas das das dasdas dasdasdad asdas dasda</div></div>
+        <div class="row"><div class="pollutant">SO2</div><div class="pollutant-description">ppb sdaasd asdasd sadasd asdasdas dasdasda sdadasdas dasda</div></div>
+      </div>
     </div>
   </div>
-  <div style="height:calc(20vh - 40px)" class="pollutant-buttons">
-    <div style="height: 5px; width: 100%;" ></div>
-    <div style="display: inline-block">See A Pollutant's Concentration in Air: </div>
-    <div class="pollutant">CO <span class="pollutant-unit">ppm</span></div>
-    <div class="pollutant">NO2 <span class="pollutant-unit">ppb</span></div>
-    <div class="pollutant">O3 <span class="pollutant-unit">ppm</span></div>
-    <div class="pollutant">SO2 <span class="pollutant-unit">ppb</span></div>
-    <div class="pollutant-description" id="description"></div>
-    <div class="pollutant-description"></div>
+  <div style="height:calc(10vh - 40px)" class="pollutant-buttons-banner">
+    <div class="pollutant" style="width: 60px"id="back"><< Back</div>
+    <div class="pollutant">CO</div>
+    <div class="pollutant">NO2</div>
+    <div class="pollutant">O3</div>
+    <div class="pollutant">SO2</div>
   </div>
-  <div style="height:20vh"></div>
-  <div style="height:80vh" id="part4chart">
+  <div style="height:90vh" id="part4chart">
+    Average population for <span id="selectedState"></span> is <span id="statePopulation"></span>
     <text id="output"></text>
   </div>
 
