@@ -1,4 +1,8 @@
 // us map
+
+var activePollutant = null;
+var activeState = null;
+var yUnits = null;
 var draw = async function(){
     const idToStates = {
         "01": "AL",
@@ -120,18 +124,10 @@ var draw = async function(){
         stateFeatures = topojson.feature(us,us.objects.states).features;
         updatePopulation()
 
-        const logScale = d3.scaleLog([1,1],[1,1]);
-
-        const colorScale = d3.scaleSequential()
+        const colorScale = d3.scaleDiverging()
         .domain([minPop-1,maxPop+1])
         .interpolator(t=>{
-            // t = logScale(t);
-            let rgb = d3.rgb(209*t+249*(1-t), 61*t+195*(1-t), 0*t+11*(1-t));
-            let c = d3.color(rgb);
-            c.opacity = Math.min(20*t,1);
-
-            return c;
-
+            return d3.rgb(214*t+249*(1-t), 110*t+195*(1-t), 67*t+11*(1-t));
         })
         
         var selection = mapSvg.append('g')
@@ -144,13 +140,22 @@ var draw = async function(){
             return colorScale(d.population)
         });
         
+        var activeState; 
         var update = enter.append('path')
         .attr('class','state')
         .attr('d',path)
         .on('click',d=>{
             selectedState = idToStates[d.id];
             stateHeader.innerHTML = abbrToFull[selectedState];
-            stateChosen = true;
+         
+            activeState = selectedState;
+            if (activePollutant!=null){
+                drawGraph(selectedState, activePollutant);
+
+            }
+            console.log(activePollutant);
+
+          
             showSinglePopulation();
         })
         .attr('fill',d=>{
@@ -348,8 +353,15 @@ var draw = async function(){
     CO: ppm
 
     */
+    function clearGraph(){
 
-    function drawGraph(stateChosen){
+        svgChart.selectAll("path.line").remove();
+        svgChart.selectAll("text").remove();
+        svgChart.selectAll("g").remove();
+        svgChart.selectAll(".line").remove();
+    }
+
+    function drawGraph(activeState, activePollutant){
 
         
         console.log(pollutant_by_state);
@@ -409,33 +421,35 @@ var draw = async function(){
                 .attr("font-size", "16px")
                 .attr("text-anchor", "middle")
                 .attr("transform", "rotate(-90)")
-                .text("Units");
+                .text(yUnits);
+
+
+             var avgLine = d3.line()
+                .x(function (d, i) {
+                    return yearScale(i) + xAxisOffsetLine;
+                })
+                .y(function (d) {
+                    return yScale(d.GENERATION);
+                })
+                .curve(d3.curveCardinal);
+            /*
+            svgChart.append("path")
+                .datum(avgLine)
+                .attr("class", "line")
+                .attr('d', avgLine);
+            */
+
+
 
     }
 
 
-
-
-
-
-
-
-
-
-    var mapDraw = await drawMap();
-    drawSlider();
-    showSinglePopulation();
-    drawGraph(stateChosen);
-}
 
 var selectedState = "*Choose a state*";
 var stateNameArea = document.getElementById('selectedState');
 var statePopArea = document.getElementById('statePopulation');
 var yearRange = [2000, 2016];
 
-draw();
-
-// page jump
 var part1 =document.getElementById('part2map');
 var part2= document.getElementById('part4chart');
 var btns = document.querySelectorAll('.pollutant');
@@ -449,16 +463,20 @@ for(let i=0;i<btns.length;i++){
         banner.style.opacity = 1;
         banner.style.delay = 'opacity 2s'
         banner.style.transition = 'opacity 1s'
-        let pollutantName = btns[i].innerHTML;
+        let activePollutant = btns[i].innerHTML;
         for(let j=0;j<btns.length;j++){
-            if(btns[j].innerHTML === pollutantName){
+            if(btns[j].innerHTML === activePollutant){
                 btns[j].setAttribute('class','pollutant-chosen pollutant');
             }else{
                 btns[j].setAttribute('class','pollutant');
             }
             
         }
-        textarea.innerHTML=pollutantName;
+        if (activePollutant == "CO" || activePollutant == "O3"){yUnits = "Parts per million";} else{ yUnits = "Parts per billion";}
+        
+        textarea.innerHTML=activePollutant;
+        clearGraph();
+        drawGraph(activeState, activePollutant);
     }
     btns[i].onmouseover = ()=>{
         
@@ -469,3 +487,19 @@ backBtn.onclick = ()=>{
     part1.scrollIntoView({behavior: "smooth"});
     banner.style.opacity = 0;
 }
+
+
+
+
+
+    var mapDraw = await drawMap();
+    drawSlider();
+    showSinglePopulation();
+    
+}
+
+
+
+draw();
+
+// page jump
