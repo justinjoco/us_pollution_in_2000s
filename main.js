@@ -449,8 +449,16 @@ for(let i=0;i<btns.length;i++){
         banner.style.opacity = 1;
         banner.style.delay = 'opacity 2s'
         banner.style.transition = 'opacity 1s'
-        let msg = btns[i].innerHTML;
-        textarea.innerHTML=msg;
+        let pollutantName = btns[i].innerHTML;
+        for(let j=0;j<btns.length;j++){
+            if(btns[j].innerHTML === pollutantName){
+                btns[j].setAttribute('class','pollutant-chosen pollutant');
+            }else{
+                btns[j].setAttribute('class','pollutant');
+            }
+            
+        }
+        textarea.innerHTML=pollutantName;
     }
     btns[i].onmouseover = ()=>{
         
