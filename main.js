@@ -1,5 +1,4 @@
 // us map
-
 var draw = async function(){
     const idToStates = {
         "01": "AL",
@@ -53,7 +52,7 @@ var draw = async function(){
         54:	"WV",
         55:	"WI",
         56:	"WY"
-    }
+    };
 
     const abbrToFull = {
         "AL":"Alabama",
@@ -107,8 +106,8 @@ var draw = async function(){
         "WV": "West Virginia",
         "WI": "Wisconsin",
         "WY": "Wyoming"
-    }
-
+    };
+    var stateChosen = false;
     var stateFeatures;
     var stateHeader = document.getElementById("state");
     async function drawMap(){
@@ -146,6 +145,7 @@ var draw = async function(){
         .on('click',d=>{
             selectedState = idToStates[d.id];
             stateHeader.innerHTML = abbrToFull[selectedState];
+            stateChosen = true;
             showSinglePopulation();
         })
         .attr('fill',d=>{
@@ -319,12 +319,100 @@ var draw = async function(){
     
     let popByYear = await d3.json('pop_by_year.json');
     
+    var pollutant_by_state = await d3.json("pollutant_by_state.json");
+    var svgChart = d3.select("#bar_chart");
+    var chartWidth = svgChart.attr("width");
+    var chartHeight = svgChart.attr("height");
+  
+    /*
+    UNITS:
+    NO2: ppb
+    O3: ppm
+    SO2: ppb
+    CO: ppm
+
+    */
+
+    function drawGraph(stateChosen){
+
+        
+        console.log(pollutant_by_state);
+
+
+        
+            const yearScale = d3.scaleLinear().domain([2000, 2016]).range([0, chartWidth - 80 ]);
+         
+    
+       
+
+            // y scales -> Energy Generated
+        
+            const yScale = d3.scaleLinear().domain([0, 1]).range([chartHeight-50, 30]);
+
+        
+
+
+            //Create an offset to correctly place d3 line over axes
+            var xAxisOffsetLine =  130; 
+
+            //Create y axis
+            var yAxis = d3.axisLeft(yScale);
+            svgChart.append("g")
+                .attr("class", "left axis")
+                .attr("transform", "translate(" + 40 + "," + 0 + ")")
+                .call(yAxis);
+
+            
+            
+            var yearAxis = d3.axisBottom(yearScale).tickValues([2000,2001,2002,2003,2004, 2005,2006,2007,2008, 2009,2010,2011, 2012, 2013, 2014, 2015, 2016])
+            .tickFormat(function(d,i){ return d; });
+        
+            // Create x axis and get array of x pixel locations of the month ticks
+            var yearTickArray = [];
+            svgChart.append("g")
+                .attr("class", "bottom axis")
+                .attr("transform", "translate(50," + (chartHeight-50) + ")")
+                .call(yearAxis);
+
+     
+
+            // x label
+            svgChart.append("text")
+                .attr("class", "x axis label")
+                .attr("x", chartWidth / 2)
+                .attr("y", chartHeight - 8)
+                .attr("font-size", "18px")
+                .attr("text-anchor", "middle")
+                .text("Year");
+
+            // y label
+            svgChart.append("text")
+                .attr("class", "y axis label")
+                .attr("x", -chartHeight / 2)
+                .attr("y", 10)
+                .attr("font-size", "16px")
+                .attr("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .text("Units");
+
+    }
+
+
+
+
+
+
+
+
+
+
     var mapDraw = await drawMap();
     drawSlider();
     showSinglePopulation();
+    drawGraph(stateChosen);
 }
 
-var selectedState = "NY";
+var selectedState = "*Choose a state*";
 var stateNameArea = document.getElementById('selectedState');
 var statePopArea = document.getElementById('statePopulation');
 var yearRange = [2000, 2016];
