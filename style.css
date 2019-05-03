@@ -1,9 +1,9 @@
 h1{
-    font-family: Corbel;
+    /* font-family: Corbel; */
     color: #4F342A;
 }
 text{
-    font-family: Corbel;
+    /* font-family: Corbel; */
     color: #4F342A;
 }
 body{
@@ -37,13 +37,13 @@ body{
 }
 
 .stateinfo{
-    font-family: Corbel;
+    /* font-family: Corbel; */
     color: #4F342A;
     font-weight: bold;
 }
 
 .selectpollutant{
-    font-family: Corbel;
+    /* font-family: Corbel; */
     color: #4F342A;
     font-weight: bold;
 }
@@ -116,10 +116,13 @@ body{
     color: rgb(177, 177, 177);
 }
 
-h1, h2{
+h1, h2, h3{
     color: #4f342a;
 }
 h2{
+    font-size: 24px;
+}
+h3{
     font-size: 20px;
 }
 

@@ -19,11 +19,12 @@
 
     <div style="margin: 1em 40px" class="row">
       <div>
-        <h2 id="state">Select a state</h2>
         <svg id="map"></svg>
       </div>
       <div>
-        <h2>Choose a pollutant</h2>
+        <h2 id="state">Select a state</h2>
+        <h3>Average Population: <span class="statePopulation"></span></h3>
+        <h3>Choose a pollutant</h3>
         <div style="margin: 1em 0" class="row"><div class="pollutant">CO</div><div class="pollutant-description">Carbon monoxide (CO) is toxic to animals that use hemoglobin as an oxygen carrier when encountered in concentrations above about 35 ppm</div></div>
         <div class="row"><div class="pollutant">NO2</div><div class="pollutant-description">Nitrogen dioxide (NO2) is an irritant gas, which at high concentrations causes inflammation of the airways.</div></div>
         <div class="row"><div class="pollutant">O3</div><div class="pollutant-description">Ozone or trioxygen (O3) is an air pollutant that is harmful to breathe and it damages crops, trees and other vegetation.</div></div>
@@ -38,23 +39,25 @@
     <div class="pollutant">O3</div>
     <div class="pollutant">SO2</div>
   </div>
-  <div style="height:90vh" id="part4chart">
-    Average population for <span id="selectedState"></span> = <span id="statePopulation"></span>
+  <div style="height:90vh; padding: 40px;" id="part4chart">
+    <h2 ><span id="selectedState">CA</span> <span id="selectedRange">2010 - 2016</span></h2>
+    <h3>Average Population: <span class="statePopulation"></span></h3>
+    <h3>Concentration of <span id="activePollutant"></span></h3>
+    
     <text id="output"></text>
     <div align="center">
-    
-      <h2 id="lineHead" style="margin-top: 40px; text-align: center">Amount Chart</h2>
-      <svg id="bar_chart" height="500" width="1300" style="border:1px solid black"></svg>
+      <!-- <h2 id="lineHead" style="margin-top: 40px; text-align: center">Amount Chart</h2> -->
+      <svg id="bar_chart" style="border:1px solid black"></svg>
      </div>
+     <footer>
+        <p> 
+          INFO5100 Final Project, Copyright &copy; 2019 <br>
+          Justin Joco, Zeya Peng, Zidong(Zoey) Zhang
+        </p>
+      </footer>
   </div>
 
   <script type="text/javascript" src="main.js"></script>
 </body>
-<footer>
-  <p> 
-    INFO5100 Final Project, Copyright &copy; 2019 <br>
-    Justin Joco, Zeya Peng, Zidong(Zoey) Zhang
-  </p>
-</footer>
 
 </html>

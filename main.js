@@ -162,7 +162,7 @@ var draw = async function(){
                 drawGraph(activeState, activePollutant);
 
             }
-            console.log(activeState);
+            // console.log(activeState);
             
           
             showSinglePopulation();
@@ -337,7 +337,9 @@ var draw = async function(){
     }
 
     function showSinglePopulation(){
-        stateNameArea.innerHTML = selectedState;
+        stateNameArea.innerHTML = abbrToFull[selectedState]||'';
+        yearRangeArea.innerHTML = yearRange[0]+' - ' +yearRange[1];
+        statePopAreas.forEach(e=>e.innerHTML = !selectedState?'':calcAvgPop(yearRange,selectedState)+'k')
     }
     
     let popByYear = await d3.json('pop_by_year.json');
@@ -350,8 +352,10 @@ var draw = async function(){
         }
     }
     
+    var svgChart = d3.select("#bar_chart")
+    .attr('height',500)
+    .attr('width',1000);
     
-    var svgChart = d3.select("#bar_chart");
     var chartWidth = svgChart.attr("width");
     var chartHeight = svgChart.attr("height");
   
@@ -376,7 +380,7 @@ var draw = async function(){
         let valueList = [];
         let stateList = [];
         
-        console.log(pollutant_data[state]);
+        // console.log(pollutant_data[state]);
         for (let currYear = startYear; currYear<=endYear; currYear++){
             let state_count = 0;
             let total_pollutant = 0;
@@ -394,7 +398,7 @@ var draw = async function(){
         }
         if (pollutant_data[currState] != undefined){
             for (let currYear = startYear; currYear<=endYear; currYear++){
-                console.log(pollutant_data[currState]);
+                // console.log(pollutant_data[currState]);
                 if (currYear in pollutant_data[currState]){
                     stateList.push(pollutant_data[currState][currYear][activePollutant])
                 };
@@ -404,100 +408,99 @@ var draw = async function(){
 
     }
 
+    var yearScale = d3.scaleLinear().domain([2000, 2016]).range([0, chartWidth - 80 ]);
+        
+    var resizeSvgChart = ()=>{
+        let width = document.body.clientWidth - 80;
+        svgChart.attr('width',width)
+        chartWidth = svgChart.attr("width");
+        yearScale = d3.scaleLinear().domain([2000, 2016]).range([0, chartWidth - 80 ]);
+    };
+    resizeSvgChart();
+    window.addEventListener('resize', resizeSvgChart)
+
     function drawGraph(activeState, activePollutant){
         clearGraph();
         
-        console.log(pollutant_data);
-        console.log(activeState);
-        console.log(abbrToFull[activeState]);
-            let [avgData, stateData] = generateAvgData(pollutant_data, activePollutant, abbrToFull[activeState]);
+        let [avgData, stateData] = generateAvgData(pollutant_data, activePollutant, abbrToFull[activeState]);
 
-
-           
-            const yearScale = d3.scaleLinear().domain([2000, 2016]).range([0, chartWidth - 80 ]);
-         
     
-       
 
-            // y scales -> Energy Generated
+        // y scales -> Energy Generated
+    
+        const yScale = d3.scaleLinear().domain([0, Math.max(d3.max(avgData), d3.max(stateData))]).range([chartHeight-50, 30]);
+
+
+        //Create an offset to correctly place d3 line over axes
+        var xAxisOffsetLine =  130; 
+
+        //Create y axis
+        var yAxis = d3.axisLeft(yScale);
+        svgChart.append("g")
+            .attr("class", "left axis")
+            .attr("transform", "translate(" + 40 + "," + 0 + ")")
+            .call(yAxis);
         
-            const yScale = d3.scaleLinear().domain([0, Math.max(d3.max(avgData), d3.max(stateData))]).range([chartHeight-50, 30]);
-
         
+        var yearAxis = d3.axisBottom(yearScale).tickValues([2000,2001,2002,2003,2004, 2005,2006,2007,2008, 2009,2010,2011, 2012, 2013, 2014, 2015, 2016])
+        .tickFormat(function(d,i){ return d; });
+    
+        // Create x axis and get array of x pixel locations of the month ticks
+        var yearTickArray = [];
+        svgChart.append("g")
+            .attr("class", "bottom axis")
+            .attr("transform", "translate(50," + (chartHeight-50) + ")")
+            .call(yearAxis);
+
+    
+
+        // x label
+        svgChart.append("text")
+            .attr("class", "x axis label")
+            .attr("x", chartWidth / 2)
+            .attr("y", chartHeight - 8)
+            .attr("font-size", "18px")
+            .attr("text-anchor", "middle")
+            .text("Year");
+
+        // y label
+        svgChart.append("text")
+            .attr("class", "y axis label")
+            .attr("x", -chartHeight / 2)
+            .attr("y", 10)
+            .attr("font-size", "16px")
+            .attr("text-anchor", "middle")
+            .attr("transform", "rotate(-90)")
+            .text(yUnits);
 
 
-            //Create an offset to correctly place d3 line over axes
-            var xAxisOffsetLine =  130; 
-
-            //Create y axis
-            var yAxis = d3.axisLeft(yScale);
-            svgChart.append("g")
-                .attr("class", "left axis")
-                .attr("transform", "translate(" + 40 + "," + 0 + ")")
-                .call(yAxis);
-
-            
-            
-            var yearAxis = d3.axisBottom(yearScale).tickValues([2000,2001,2002,2003,2004, 2005,2006,2007,2008, 2009,2010,2011, 2012, 2013, 2014, 2015, 2016])
-            .tickFormat(function(d,i){ return d; });
+            var line = d3.line()
+            .x(function (d, i) {    
+                return yearScale(i+2000)+50;
+            })
+            .y(function (d) {
+                            
+                return yScale(d);
+            }).curve(d3.curveCardinal);
         
-            // Create x axis and get array of x pixel locations of the month ticks
-            var yearTickArray = [];
-            svgChart.append("g")
-                .attr("class", "bottom axis")
-                .attr("transform", "translate(50," + (chartHeight-50) + ")")
-                .call(yearAxis);
+        svgChart.append("path")
+            .datum(avgData)
+            .attr("class", "line")
+            .style("stroke", "#826c64")
+            .style('opacity',0.3)
+            .attr('d', line);
 
-     
-
-            // x label
-            svgChart.append("text")
-                .attr("class", "x axis label")
-                .attr("x", chartWidth / 2)
-                .attr("y", chartHeight - 8)
-                .attr("font-size", "18px")
-                .attr("text-anchor", "middle")
-                .text("Year");
-
-            // y label
-            svgChart.append("text")
-                .attr("class", "y axis label")
-                .attr("x", -chartHeight / 2)
-                .attr("y", 10)
-                .attr("font-size", "16px")
-                .attr("text-anchor", "middle")
-                .attr("transform", "rotate(-90)")
-                .text(yUnits);
+        // console.log(stateData.length);
+    
 
 
-             var line = d3.line()
-                .x(function (d, i) {    
-                    return yearScale(i+2000)+50;
-                })
-                .y(function (d) {
-                               
-                    return yScale(d);
-                }).curve(d3.curveCardinal);
-               
-            
-             console.log(avgData);
-            
-            svgChart.append("path")
-                .datum(avgData)
-                .attr("class", "line")
-                .style("stroke", "red")
-                .attr('d', line);
-
-            console.log(stateData.length);
-        
-
-
-            // No data for Montana, Mississippi, New Mexico, Vermont, Nebraska
-            svgChart.append("path")
-                .datum(stateData)
-                .attr("class", "line")
-                .style("stroke", "blue")
-                .attr('d', line);
+        // No data for Montana, Mississippi, New Mexico, Vermont, Nebraska
+        svgChart.append("path")
+            .datum(stateData)
+            .attr("class", "line")
+            .style("stroke", "#02d1ff")
+            .style('stroke-width','3')
+            .attr('d', line);
             
 
 
@@ -505,9 +508,11 @@ var draw = async function(){
 
 
 
-var selectedState = "*Choose a state*";
+var selectedState = null;
 var stateNameArea = document.getElementById('selectedState');
-var statePopArea = document.getElementById('statePopulation');
+var yearRangeArea = document.getElementById('selectedRange');
+var statePopAreas = document.querySelectorAll('.statePopulation');
+var activePollutantArea = document.getElementById('activePollutant');
 var yearRange = [2000, 2016];
 
 var part1 =document.getElementById('part2map');
@@ -535,7 +540,7 @@ for(let i=0;i<btns.length;i++){
         if (activePollutant == "CO" || activePollutant == "O3"){yUnits = "Parts per million";} else{ yUnits = "Parts per billion";}
         
 
-        //textarea.innerHTML=msg;
+        activePollutantArea.innerHTML = activePollutant;
 
         clearGraph();
         drawGraph(activeState, activePollutant);
