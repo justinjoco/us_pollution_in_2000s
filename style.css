@@ -13,7 +13,7 @@ body{
     font-size: 15px;
 }
 .state:hover {
-    fill: red;
+    opacity: 0.5;
 }
 .states{
     transform: scale(0.6);
@@ -67,6 +67,7 @@ body{
 .pollutant:hover{
     background: #f9c30b;
     border: 1px solid #f9c30b;
+    color: white;
 }
 
 

@@ -45,7 +45,7 @@ var draw = async function(){
         46:	"SD",
         47:	"TN",
         48:	"TX",
-        49:'UT',
+        49: 'UT',
         50:	"VT",
         51:	"VA",
         53:	"WA",
@@ -119,27 +119,24 @@ var draw = async function(){
         var us = await d3.json('us-10m.v1.json');
         stateFeatures = topojson.feature(us,us.objects.states).features;
         updatePopulation()
-        var colorScale = d3.scaleDiverging()
-        .domain([Math.min(...stateFeatures.map(s=>s.population))-1,
-        Math.max(...stateFeatures.map(s=>s.population))+1])
+
+        const colorScale = d3.scaleDiverging()
+        .domain([minPop-1,maxPop+1])
         .interpolator(t=>{
             return d3.rgb(214*t+249*(1-t), 110*t+195*(1-t), 67*t+11*(1-t));
         })
-        var update = mapSvg.append('g')
+        
+        var selection = mapSvg.append('g')
         .attr('class','states')
         .selectAll('path')
         .data(stateFeatures);
 
-        var enter = update.enter();
-        var updateFn = ()=>{
-            update.attr('fill',d=>{
-                
-                return colorScale(d.population)
-            });
-        }
-        updateFn();
+        var enter = selection.enter();
+        selection.attr('fill',d=>{
+            return colorScale(d.population)
+        });
         
-        enter.append('path')
+        var update = enter.append('path')
         .attr('class','state')
         .attr('d',path)
         .on('click',d=>{
@@ -151,14 +148,18 @@ var draw = async function(){
         .attr('fill',d=>{
             return colorScale(d.population)
         });
+        var updateColor = ()=>{
+            update.attr('fill',(d,id)=>{
+                return colorScale(stateFeatures[id].population)
+            })
+        }
 
         mapSvg.append('path')
         .attr('class','state-borders')
         .attr('d',path(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; })));
 
         return {
-            update,
-            updateFn
+            selection,updateColor
         };
     }
 
@@ -237,8 +238,9 @@ var draw = async function(){
                         yearRange[0] = yearRange[1];
                     }
                     updatePopulation();
-                    mapDraw.update.data(stateFeatures);
-                    mapDraw.updateFn();
+
+                    mapDraw.updateColor()
+                    
                     showSinglePopulation()
                 })
             );
@@ -260,8 +262,8 @@ var draw = async function(){
                         yearRange[1] = yearRange[0];
                     }
                     updatePopulation();
-                    mapDraw.update.data(stateFeatures);
-                    mapDraw.updateFn();
+                    mapDraw.updateColor()
+
                     showSinglePopulation();
                 })
             );
@@ -308,8 +310,7 @@ var draw = async function(){
                 }
                 newElem.population = pop;
                 stateFeatures[i] = newElem;
-            }
-                
+            } 
         }
     }
 
@@ -318,6 +319,13 @@ var draw = async function(){
     }
     
     let popByYear = await d3.json('pop_by_year.json');
+    var maxPop = 0, minPop = Infinity;
+    for(let year in popByYear){
+        for(let state in popByYear[year]){
+            maxPop = Math.max(popByYear[year][state],maxPop);
+            minPop = Math.min(popByYear[year][state],minPop);
+        }
+    }
     
     var pollutant_by_state = await d3.json("pollutant_by_state.json");
     var svgChart = d3.select("#bar_chart");
@@ -426,12 +434,6 @@ var btns = document.querySelectorAll('.pollutant');
 let textarea =  document.getElementById("output");
 var banner = document.querySelector('.pollutant-buttons-banner');
 let backBtn = document.querySelector('#back');
-
-const descriptions = [
-    'Carbon monoxide (CO) is toxic to animals that use hemoglobin as an oxygen carrier when encountered in concentrations above about 35 ppm',
-    'Nitrogen dioxide (NO2) is an irritant gas, which at high concentrations causes inflammation of the airways.',
-    'Ozone or trioxygen (O3) is an air pollutant that is harmful to breathe and it damages crops, trees and other vegetation.',
-    'Sulfur dioxide (SO2) irritates the nose, throat, and airways to cause coughing, wheezing, shortness of breath, or a tight feeling around the chest.'];
 
 for(let i=0;i<btns.length;i++){
     btns[i].onclick = ()=>{
