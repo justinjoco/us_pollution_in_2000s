@@ -15,9 +15,11 @@ body{
 .state:hover {
     opacity: 0.5;
 }
+
 .states{
     transform: scale(0.6);
 }
+
 
 .state-borders {
     fill: none;
