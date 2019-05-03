@@ -3,7 +3,11 @@
 var activePollutant = null;
 var activeState = null;
 var yUnits = null;
+var avgData = null;
+var startYear = 2000;
+var endYear = 2016;
 var draw = async function(){
+    var pollutant_data = await d3.json("pollutant_by_state.json");
     const idToStates = {
         "01": "AL",
         "02": 'AK',
@@ -140,7 +144,7 @@ var draw = async function(){
             return colorScale(d.population)
         });
         
-        var activeState; 
+
         var update = enter.append('path')
         .attr('class','state')
         .attr('d',path)
@@ -150,11 +154,11 @@ var draw = async function(){
          
             activeState = selectedState;
             if (activePollutant!=null){
-                drawGraph(selectedState, activePollutant);
+                drawGraph(activeState, activePollutant);
 
             }
-            console.log(activePollutant);
-
+            console.log(activeState);
+            
           
             showSinglePopulation();
         })
@@ -332,6 +336,7 @@ var draw = async function(){
     }
     
     let popByYear = await d3.json('pop_by_year.json');
+
     var maxPop = 0, minPop = Infinity;
     for(let year in popByYear){
         for(let state in popByYear[year]){
@@ -340,11 +345,12 @@ var draw = async function(){
         }
     }
     
-    var pollutant_by_state = await d3.json("pollutant_by_state.json");
+    
     var svgChart = d3.select("#bar_chart");
     var chartWidth = svgChart.attr("width");
     var chartHeight = svgChart.attr("height");
   
+
     /*
     UNITS:
     NO2: ppb
@@ -361,13 +367,48 @@ var draw = async function(){
         svgChart.selectAll(".line").remove();
     }
 
+    function generateAvgData(pollutant_data, activePollutant, currState){
+        let valueList = [];
+        let stateList = [];
+        
+        console.log(pollutant_data[state]);
+        for (let currYear = startYear; currYear<=endYear; currYear++){
+            let state_count = 0;
+            let total_pollutant = 0;
+           
+           
+            for (let state in pollutant_data){
+              //  console.log(state);
+                if (currYear in pollutant_data[state]){
+                    total_pollutant += pollutant_data[state][currYear][activePollutant];
+                    state_count++;
+                }
+
+            }
+            valueList.push(total_pollutant/state_count);
+        }
+        if (pollutant_data[currState] != undefined){
+            for (let currYear = startYear; currYear<=endYear; currYear++){
+                console.log(pollutant_data[currState]);
+                if (currYear in pollutant_data[currState]){
+                    stateList.push(pollutant_data[currState][currYear][activePollutant])
+                };
+            }
+        }   
+        return [valueList, stateList];
+
+    }
+
     function drawGraph(activeState, activePollutant){
-
+        clearGraph();
         
-        console.log(pollutant_by_state);
+        console.log(pollutant_data);
+        console.log(activeState);
+        console.log(abbrToFull[activeState]);
+            let [avgData, stateData] = generateAvgData(pollutant_data, activePollutant, abbrToFull[activeState]);
 
 
-        
+           
             const yearScale = d3.scaleLinear().domain([2000, 2016]).range([0, chartWidth - 80 ]);
          
     
@@ -375,7 +416,7 @@ var draw = async function(){
 
             // y scales -> Energy Generated
         
-            const yScale = d3.scaleLinear().domain([0, 1]).range([chartHeight-50, 30]);
+            const yScale = d3.scaleLinear().domain([0, Math.max(d3.max(avgData), d3.max(stateData))]).range([chartHeight-50, 30]);
 
         
 
@@ -424,21 +465,35 @@ var draw = async function(){
                 .text(yUnits);
 
 
-             var avgLine = d3.line()
-                .x(function (d, i) {
-                    return yearScale(i) + xAxisOffsetLine;
+             var line = d3.line()
+                .x(function (d, i) {    
+                    return yearScale(i+2000)+50;
                 })
                 .y(function (d) {
-                    return yScale(d.GENERATION);
-                })
-                .curve(d3.curveCardinal);
-            /*
+                               
+                    return yScale(d);
+                }).curve(d3.curveCardinal);
+               
+            
+             console.log(avgData);
+            
             svgChart.append("path")
-                .datum(avgLine)
+                .datum(avgData)
                 .attr("class", "line")
-                .attr('d', avgLine);
-            */
+                .style("stroke", "red")
+                .attr('d', line);
 
+            console.log(stateData.length);
+        
+
+
+            // No data for Montana, Mississippi, New Mexico, Vermont, Nebraska
+            svgChart.append("path")
+                .datum(stateData)
+                .attr("class", "line")
+                .style("stroke", "blue")
+                .attr('d', line);
+            
 
 
     }
@@ -469,7 +524,7 @@ for(let i=0;i<btns.length;i++){
         if (msg == "CO" || msg == "O3"){yUnits = "Parts per million";} else{ yUnits = "Parts per billion";}
         
         textarea.innerHTML=msg;
-        clearGraph();
+      
         drawGraph(activeState, activePollutant);
     }
     btns[i].onmouseover = ()=>{

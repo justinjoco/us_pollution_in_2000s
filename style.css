@@ -13,7 +13,12 @@ body{
     font-size: 15px;
 }
 .state:hover {
-    opacity: 0.5;
+    opacity: .5;
+}
+
+.line {
+  fill: none;
+  stroke-width: 2px;
 }
 
 .states{
