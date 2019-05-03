@@ -124,10 +124,15 @@ var draw = async function(){
         stateFeatures = topojson.feature(us,us.objects.states).features;
         updatePopulation()
 
-        const colorScale = d3.scaleDiverging()
+        const colorScale = d3.scaleSequential()
+
         .domain([minPop-1,maxPop+1])
         .interpolator(t=>{
-            return d3.rgb(214*t+249*(1-t), 110*t+195*(1-t), 67*t+11*(1-t));
+            let rgb = d3.rgb(209*t+249*(1-t), 61*t+195*(1-t), 0*t+11*(1-t));
+            let c = d3.color(rgb);
+            c.opacity = Math.min(20*t,1);
+
+            return c;
         })
         
         var selection = mapSvg.append('g')
