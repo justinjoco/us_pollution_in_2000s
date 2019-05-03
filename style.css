@@ -93,7 +93,6 @@ body{
     flex-flow: row nowrap;
     justify-content: flex-start;
     align-items: flex-start;
-    margin: 1em 0;
 }
 .pollutant-unit{
     color: rgb(177, 177, 177);
