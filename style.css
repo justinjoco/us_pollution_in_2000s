@@ -76,6 +76,16 @@ body{
     border: 1px solid #f9c30b;
     color: white;
 }
+.pollutant-chosen{
+    background: #f9c30b;
+    border: 1px solid #f9c30b;
+    color: white;
+}
+#back{
+    width: 60px;
+    background: #826c64;
+    color: white;
+}
 
 
 .pollutant-buttons-banner{

@@ -128,10 +128,15 @@ var draw = async function(){
         stateFeatures = topojson.feature(us,us.objects.states).features;
         updatePopulation()
 
-        const colorScale = d3.scaleDiverging()
+        const colorScale = d3.scaleSequential()
+
         .domain([minPop-1,maxPop+1])
         .interpolator(t=>{
-            return d3.rgb(214*t+249*(1-t), 110*t+195*(1-t), 67*t+11*(1-t));
+            let rgb = d3.rgb(209*t+249*(1-t), 61*t+195*(1-t), 0*t+11*(1-t));
+            let c = d3.color(rgb);
+            c.opacity = Math.min(20*t,1);
+
+            return c;
         })
         
         var selection = mapSvg.append('g')
@@ -518,13 +523,21 @@ for(let i=0;i<btns.length;i++){
         banner.style.opacity = 1;
         banner.style.delay = 'opacity 2s'
         banner.style.transition = 'opacity 1s'
-        let msg = btns[i].innerHTML;
-        console.log(msg);
-        activePollutant = msg;
-        if (msg == "CO" || msg == "O3"){yUnits = "Parts per million";} else{ yUnits = "Parts per billion";}
+        let activePollutant = btns[i].innerHTML;
+        for(let j=0;j<btns.length;j++){
+            if(btns[j].innerHTML === activePollutant){
+                btns[j].setAttribute('class','pollutant-chosen pollutant');
+            }else{
+                btns[j].setAttribute('class','pollutant');
+            }
+            
+        }
+        if (activePollutant == "CO" || activePollutant == "O3"){yUnits = "Parts per million";} else{ yUnits = "Parts per billion";}
         
-        textarea.innerHTML=msg;
-      
+
+        //textarea.innerHTML=msg;
+
+        clearGraph();
         drawGraph(activeState, activePollutant);
     }
     btns[i].onmouseover = ()=>{
