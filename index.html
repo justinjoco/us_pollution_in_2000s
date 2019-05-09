@@ -13,48 +13,35 @@
 </header>
 
 <body>
-  <div style="height:100vh" id="part2map">
+  <div id="part2map">
     <center><h1>US Population V.S. Pollution in 2000's</h1></center>
     <svg id="yearSlider"></svg>
-
-    <div style="margin: 1em 40px" class="row">
-      <div>
+    <div style="margin: 0 40px" class="row">
+      <div style="width:50%">
+        <div class="state-input-box"><span style="margin-right:1em">State Name</span>
+          <input class="state-input" placeholder="State Name, e.g. New York, or NY" value="New York"></input></div>
+        <div class="state-input-result">New York</div>
+        <div class="state-input-result">New Jersey</div>
+        <div class="state-input-result">New Hampshire</div>
         <svg id="map"></svg>
       </div>
-      <div>
-        <h2 id="state">Select a state</h2>
-        <h3>Average Population: <span class="statePopulation"></span></h3>
-        <h3>Choose a pollutant</h3>
-        <div style="margin: 1em 0" class="row"><div class="pollutant">CO</div><div class="pollutant-description">Carbon monoxide (CO) is toxic to animals that use hemoglobin as an oxygen carrier when encountered in concentrations above about 35 ppm</div></div>
-        <div class="row"><div class="pollutant">NO2</div><div class="pollutant-description">Nitrogen dioxide (NO2) is an irritant gas, which at high concentrations causes inflammation of the airways.</div></div>
-        <div class="row"><div class="pollutant">O3</div><div class="pollutant-description">Ozone or trioxygen (O3) is an air pollutant that is harmful to breathe and it damages crops, trees and other vegetation.</div></div>
-        <div class="row"><div class="pollutant">SO2</div><div class="pollutant-description">Sulfur dioxide (SO2) irritates the nose, throat, and airways to cause coughing, wheezing, shortness of breath, or a tight feeling around the chest.</div></div>
+      <div style="width:50%">
+        <div class="pollutant-buttons-banner">
+          <div style="line-height: 2em;">Show Concentration </div>
+          <div class="pollutant pollutant-chosen">CO</div>
+          <div class="pollutant">NO2</div>
+          <div class="pollutant">O3</div>
+          <div class="pollutant">SO2</div>
+        </div>
+        <svg id="bar_chart" ></svg>
       </div>
     </div>
-  </div>
-  <div style="height:calc(10vh - 40px)" class="pollutant-buttons-banner">
-    <div class="pollutant" id="back"><< Back</div>
-    <div class="pollutant">CO</div>
-    <div class="pollutant">NO2</div>
-    <div class="pollutant">O3</div>
-    <div class="pollutant">SO2</div>
-  </div>
-  <div style="height:90vh; padding: 40px;" id="part4chart">
-    <h2 ><span id="selectedState">CA</span> <span id="selectedRange">2010 - 2016</span></h2>
-    <h3>Average Population: <span class="statePopulation"></span></h3>
-    <h3>Concentration of <span id="activePollutant"></span></h3>
-    
-    <text id="output"></text>
-    <div align="center">
-      <!-- <h2 id="lineHead" style="margin-top: 40px; text-align: center">Amount Chart</h2> -->
-      <svg id="bar_chart" style="border:1px solid black"></svg>
-     </div>
-     <footer>
-        <p> 
-          INFO5100 Final Project, Copyright &copy; 2019 <br>
-          Justin Joco, Zeya Peng, Zidong(Zoey) Zhang
-        </p>
-      </footer>
+    <footer style="margin: 0 40px">
+      <p> 
+        INFO5100 Final Project, Copyright &copy; 2019 <br>
+        Justin Joco, Zeya Peng, Zidong(Zoey) Zhang
+      </p>
+    </footer>
   </div>
 
   <script type="text/javascript" src="main.js"></script>

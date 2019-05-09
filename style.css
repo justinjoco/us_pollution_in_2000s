@@ -89,18 +89,15 @@ body{
 
 
 .pollutant-buttons-banner{
-    opacity: 0;
-    position: sticky;
-    top: 0;
-    padding: 20px;
-
+    /* position: sticky;
+    top: 0; */
     display: flex;
     flex-flow: row nowrap;
-    justify-content: center;
+    justify-content: space-between;
     align-items: flex-start;
 }
 .pollutant-buttons-banner>div{
-    margin: 0 20px;
+    margin: 0;
 }
 .pollutant-description{
     width: calc(100% - 90px);
@@ -124,5 +121,21 @@ h2{
 }
 h3{
     font-size: 20px;
+}
+.state-input-box{
+    width: calc(100% - 20px);
+}
+.state-input{
+    width: 250px;
+    font-size: 1em;
+    border: none;
+    border-bottom: 2px solid #ffdb64;
+}
+
+.state-input-result{
+    font-size: 0.8em;
+    border-left: 4px solid #ffdb64;
+    padding-left: 10px;
+    margin: 4px 0;
 }
 

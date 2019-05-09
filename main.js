@@ -1,12 +1,12 @@
 // us map
 
-var activePollutant = null;
-var activeState = null;
-var yUnits = null;
-var avgData = null;
-var startYear = 2000;
-var endYear = 2016;
 var draw = async function(){
+    var activePollutant = 'CO';
+    var yUnits = null;
+    var avgData = null;
+    const sidePadding = 40;
+    var yearRange = [2000, 2016];
+
     var pollutant_data = await d3.json("pollutant_by_state.json");
     const idToStates = {
         "01": "AL",
@@ -66,7 +66,7 @@ var draw = async function(){
         "AL":"Alabama",
         "AK": "Alaska",
         'AZ': "Arizona",
-         'AR': "Arkansas",
+        'AR': "Arkansas",
         'CA': "California",
         'CO': "Colorado",
         'CT': "Connecticut",
@@ -119,9 +119,15 @@ var draw = async function(){
     var stateFeatures;
     var stateHeader = document.getElementById("state");
     async function drawMap(){
+        function resizeMap(){
+            mapWidth = (document.body.clientWidth-sidePadding*2)/2-sidePadding/2;
+            mapSvg.attr("width",mapWidth);
+        }
+
+        mapWidth = (document.body.clientWidth-sidePadding*2)/2-sidePadding/2;
         var mapSvg = d3.select('svg#map')
-        .attr("width",600)
-        .attr('height',400);
+        .attr("width",mapWidth)
+        .attr('height',350);
         var path = d3.geoPath();
 
         var us = await d3.json('us-10m.v1.json');
@@ -148,37 +154,60 @@ var draw = async function(){
         selection.attr('fill',d=>{
             return colorScale(d.population)
         });
-        
+
+        function onSelectState(d){
+            selectedState = idToStates[d.id];
+            // stateHeader.innerHTML = abbrToFull[selectedState];
+         
+            if (activePollutant!=null){
+                drawGraph(selectedState, activePollutant);
+            }
+            
+            popText.attr('opacity',(d2,id2)=>{
+                if(d2.id === d.id) return 1;
+                return 0;
+            })
+        }
 
         var update = enter.append('path')
         .attr('class','state')
         .attr('d',path)
-        .on('click',d=>{
-            selectedState = idToStates[d.id];
-            stateHeader.innerHTML = abbrToFull[selectedState];
-         
-            activeState = selectedState;
-            if (activePollutant!=null){
-                drawGraph(activeState, activePollutant);
-
-            }
-            // console.log(activeState);
-            
-          
-            showSinglePopulation();
-        })
+        .on('click',onSelectState)
         .attr('fill',d=>{
             return colorScale(d.population)
         });
+
+        var popText = enter.append('text').text(d=>d.population+'k')
+        .attr('font-size','30px')
+        .attr('pointer-event','none')
+        .attr('fill','#4f342a')
+        .attr('text-anchor','middle')
+        .attr('alignment-baseline','central')
+        .attr('opacity','0')
+        .attr('transform',d=>{
+            let xarr = d.geometry.coordinates[0][0].map(e=>e[0]);
+            let yarr = d.geometry.coordinates[0][0].map(e=>e[1])
+            let minX = d3.min(xarr);
+            let maxX = d3.max(xarr);
+            let minY = d3.min(yarr);
+            let maxY = d3.max(yarr);
+            return 'translate('+parseInt((minX+maxX)/2)+','+parseInt((minY+maxY)/2)+')'
+        })
+        .on('click',onSelectState)
+        
         var updateColor = ()=>{
             update.attr('fill',(d,id)=>{
                 return colorScale(stateFeatures[id].population)
             })
+            popText.text((d,id)=>stateFeatures[id].population+'k')
+
         }
 
         mapSvg.append('path')
         .attr('class','state-borders')
         .attr('d',path(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; })));
+
+        window.addEventListener('resize',resizeMap)
 
         return {
             selection,updateColor
@@ -186,17 +215,15 @@ var draw = async function(){
     }
 
     function drawSlider(){
-        const sidePadding = 20;
         var width = document.body.clientWidth-sidePadding*2, height = 80;
         
         const triangleSize = 40;
-        const offsetX = triangleSize;
         const sqrt3 = Math.sqrt(3)/2;
         
         var svg = d3.select('svg#yearSlider')
-        .attr('width',width+triangleSize)
+        .attr('width',width)
         .attr('height',height).append('g')
-        .attr('transform','translate('+(offsetX+sidePadding)+',0)');
+        .attr('transform','translate('+(sidePadding)+',0)');
 
         let sliderBar = svg.append('line')
         .classed('track',true);
@@ -205,7 +232,7 @@ var draw = async function(){
 
         let thumb1 = svg.append('svg:image');
         thumb1.attr('xlink:href',"img/arrow.svg")
-        .attr('x',-triangleSize/2).attr('y',-triangleSize/2)
+        .attr('x', -triangleSize/4+1).attr('y',-triangleSize/2)
         .attr('width',triangleSize).attr('height',triangleSize);
         
         let label1 = svg.append('text')
@@ -214,21 +241,21 @@ var draw = async function(){
 
         let thumb2 = svg.append('svg:image')
         thumb2.attr('xlink:href',"img/arrow.svg")
-        .attr('x',-triangleSize/2).attr('y',-triangleSize/2)
+        .attr('x',-triangleSize/4).attr('y',-triangleSize/2)
         .attr('width',triangleSize).attr('height',triangleSize);
         
         let label2 = svg.append('text')
         .text(yearRange[0])
         .style('text-anchor','start');
 
-        function resize(){
+        function resizeSlider(){
             width = document.body.clientWidth-sidePadding*2;
             
             document.getElementById('yearSlider').setAttribute('width',width+triangleSize)
 
             let xScale = d3.scaleLinear()
             .domain(yearRange)
-            .range([0,width-2*triangleSize]).clamp(true);
+            .range([0,width]).clamp(true);
 
             sliderBar.attr('x1',xScale.range()[0])
             .attr('x2',xScale.range()[1])
@@ -262,8 +289,6 @@ var draw = async function(){
                     updatePopulation();
 
                     mapDraw.updateColor()
-                    
-                    showSinglePopulation()
                 })
             );
 
@@ -285,8 +310,6 @@ var draw = async function(){
                     }
                     updatePopulation();
                     mapDraw.updateColor()
-
-                    showSinglePopulation();
                 })
             );
 
@@ -303,9 +326,9 @@ var draw = async function(){
 
         }
 
-        resize();
+        resizeSlider();
 
-        window.addEventListener('resize', resize)
+        window.addEventListener('resize', resizeSlider)
     }
 
     function calcAvgPop(yearRange, state){
@@ -334,12 +357,10 @@ var draw = async function(){
                 stateFeatures[i] = newElem;
             } 
         }
-    }
-
-    function showSinglePopulation(){
-        stateNameArea.innerHTML = abbrToFull[selectedState]||'';
-        yearRangeArea.innerHTML = yearRange[0]+' - ' +yearRange[1];
-        statePopAreas.forEach(e=>e.innerHTML = !selectedState?'':calcAvgPop(yearRange,selectedState)+'k')
+        if(activePollutant!==null){
+            drawGraph(selectedState, activePollutant);
+        }
+        
     }
     
     let popByYear = await d3.json('pop_by_year.json');
@@ -353,7 +374,7 @@ var draw = async function(){
     }
     
     var svgChart = d3.select("#bar_chart")
-    .attr('height',500)
+    .attr('height',400)
     .attr('width',1000);
     
     var chartWidth = svgChart.attr("width");
@@ -381,7 +402,7 @@ var draw = async function(){
         let stateList = [];
         
         // console.log(pollutant_data[state]);
-        for (let currYear = startYear; currYear<=endYear; currYear++){
+        for (let currYear = yearRange[0]; currYear<=yearRange[1]; currYear++){
             let state_count = 0;
             let total_pollutant = 0;
            
@@ -397,7 +418,7 @@ var draw = async function(){
             valueList.push(total_pollutant/state_count);
         }
         if (pollutant_data[currState] != undefined){
-            for (let currYear = startYear; currYear<=endYear; currYear++){
+            for (let currYear = yearRange[0]; currYear<=yearRange[1]; currYear++){
                 // console.log(pollutant_data[currState]);
                 if (currYear in pollutant_data[currState]){
                     stateList.push(pollutant_data[currState][currYear][activePollutant])
@@ -408,28 +429,24 @@ var draw = async function(){
 
     }
 
-    var yearScale = d3.scaleLinear().domain([2000, 2016]).range([0, chartWidth - 80 ]);
-        
-    var resizeSvgChart = ()=>{
-        let width = document.body.clientWidth - 80;
-        svgChart.attr('width',width)
-        chartWidth = svgChart.attr("width");
-        yearScale = d3.scaleLinear().domain([2000, 2016]).range([0, chartWidth - 80 ]);
-    };
-    resizeSvgChart();
-    window.addEventListener('resize', resizeSvgChart)
-
     function drawGraph(activeState, activePollutant){
         clearGraph();
         
         let [avgData, stateData] = generateAvgData(pollutant_data, activePollutant, abbrToFull[activeState]);
 
-    
-
         // y scales -> Energy Generated
     
         const yScale = d3.scaleLinear().domain([0, Math.max(d3.max(avgData), d3.max(stateData))]).range([chartHeight-50, 30]);
+        var yearScale;
 
+        function resizeSvgChart(){
+            let width = document.body.clientWidth - sidePadding*2;
+            svgChart.attr('width',width/2);
+            chartWidth = svgChart.attr("width");
+            yearScale = d3.scaleLinear().domain(yearRange).range([0, chartWidth - 80 ]);
+        };
+
+        resizeSvgChart();
 
         //Create an offset to correctly place d3 line over axes
         var xAxisOffsetLine =  130; 
@@ -441,8 +458,11 @@ var draw = async function(){
             .attr("transform", "translate(" + 40 + "," + 0 + ")")
             .call(yAxis);
         
-        
-        var yearAxis = d3.axisBottom(yearScale).tickValues([2000,2001,2002,2003,2004, 2005,2006,2007,2008, 2009,2010,2011, 2012, 2013, 2014, 2015, 2016])
+        var yearArray = [];
+        for(let y=yearRange[0];y<=yearRange[1];y++){
+            yearArray.push(y);
+        }
+        var yearAxis = d3.axisBottom(yearScale).tickValues(yearArray)
         .tickFormat(function(d,i){ return d; });
     
         // Create x axis and get array of x pixel locations of the month ticks
@@ -451,9 +471,7 @@ var draw = async function(){
             .attr("class", "bottom axis")
             .attr("transform", "translate(50," + (chartHeight-50) + ")")
             .call(yearAxis);
-
     
-
         // x label
         svgChart.append("text")
             .attr("class", "x axis label")
@@ -474,14 +492,13 @@ var draw = async function(){
             .text(yUnits);
 
 
-            var line = d3.line()
-            .x(function (d, i) {    
-                return yearScale(i+2000)+50;
-            })
-            .y(function (d) {
-                            
-                return yScale(d);
-            }).curve(d3.curveCardinal);
+        var line = d3.line()
+        .x(function (d, i) {
+            return yearScale(i+yearRange[0])+50;
+        })
+        .y(function (d) {
+            return yScale(d);
+        }).curve(d3.curveCardinal);
         
         svgChart.append("path")
             .datum(avgData)
@@ -501,71 +518,45 @@ var draw = async function(){
             .style("stroke", "#02d1ff")
             .style('stroke-width','3')
             .attr('d', line);
-            
-
+        
 
     }
 
 
 
-var selectedState = null;
-var stateNameArea = document.getElementById('selectedState');
-var yearRangeArea = document.getElementById('selectedRange');
-var statePopAreas = document.querySelectorAll('.statePopulation');
-var activePollutantArea = document.getElementById('activePollutant');
-var yearRange = [2000, 2016];
+    var selectedState = "NY";
+    var stateNameArea = document.getElementById('selectedState');
+    var yearRangeArea = document.getElementById('selectedRange');
+    var statePopAreas = document.querySelectorAll('.statePopulation');
 
-var part1 =document.getElementById('part2map');
-var part2= document.getElementById('part4chart');
-var btns = document.querySelectorAll('.pollutant');
-let textarea =  document.getElementById("output");
-var banner = document.querySelector('.pollutant-buttons-banner');
-let backBtn = document.querySelector('#back');
-
-for(let i=0;i<btns.length;i++){
-    btns[i].onclick = ()=>{
-        part2.scrollIntoView({behavior: "smooth"});
-        banner.style.opacity = 1;
-        banner.style.delay = 'opacity 2s'
-        banner.style.transition = 'opacity 1s'
-        let activePollutant = btns[i].innerHTML;
-        for(let j=0;j<btns.length;j++){
-            if(btns[j].innerHTML === activePollutant){
-                btns[j].setAttribute('class','pollutant-chosen pollutant');
-            }else{
-                btns[j].setAttribute('class','pollutant');
+    var part1 =document.getElementById('part2map');
+    var btns = document.querySelectorAll('.pollutant');
+    let textarea =  document.getElementById("output");
+    var banner = document.querySelector('.pollutant-buttons-banner');
+    
+    for(let i=0;i<btns.length;i++){
+        btns[i].onclick = ()=>{
+            activePollutant = btns[i].innerHTML;
+            for(let j=0;j<btns.length;j++){
+                if(btns[j].innerHTML === activePollutant){
+                    btns[j].setAttribute('class','pollutant-chosen pollutant');
+                }else{
+                    btns[j].setAttribute('class','pollutant');
+                }
+                
             }
-            
+            if (activePollutant === "CO" || activePollutant === "O3"){yUnits = "Parts per million";} else{ yUnits = "Parts per billion";}
+
+            drawGraph(selectedState, activePollutant);
         }
-        if (activePollutant == "CO" || activePollutant == "O3"){yUnits = "Parts per million";} else{ yUnits = "Parts per billion";}
-        
-
-        activePollutantArea.innerHTML = activePollutant;
-
-        clearGraph();
-        drawGraph(activeState, activePollutant);
     }
-    btns[i].onmouseover = ()=>{
-        
-    }
-}
-
-backBtn.onclick = ()=>{
-    part1.scrollIntoView({behavior: "smooth"});
-    banner.style.opacity = 0;
-}
-
-
-
-
 
     var mapDraw = await drawMap();
     drawSlider();
-    showSinglePopulation();
-    
+
+    yUnits = "Parts per million";
+    drawGraph(selectedState, activePollutant);
 }
-
-
 
 draw();
 
