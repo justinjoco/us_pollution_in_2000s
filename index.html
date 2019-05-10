@@ -14,15 +14,16 @@
 
 <body>
   <div id="part2map">
-    <center><h1>US Population V.S. Pollution in 2000's</h1></center>
+    <center><h1>US Population V.S. Air Pollution in 2000's</h1></center>
     <svg id="yearSlider"></svg>
     <div style="margin: 0 40px" class="row">
       <div style="width:50%">
         <div class="state-input-box"><span style="margin-right:1em">State Name</span>
-          <input class="state-input" placeholder="State Name, e.g. New York, or NY" value="New York"></input></div>
-        <div class="state-input-result">New York</div>
-        <div class="state-input-result">New Jersey</div>
-        <div class="state-input-result">New Hampshire</div>
+          <input id="state-input" placeholder="State Name, e.g. New York, or NY" value="New York"></input>
+        </div>
+          <div id="state-input-result">
+            <!-- <div class="state-input-result-item">New York</div> -->
+          </div>
         <svg id="map"></svg>
       </div>
       <div style="width:50%">

@@ -115,6 +115,14 @@ var draw = async function(){
         "WI": "Wisconsin",
         "WY": "Wyoming"
     };
+
+    var stateValues = [];
+    let id = 1;
+    for(let stateAbbr in abbrToFull){
+        stateValues.push(stateAbbr);
+        id++;
+    }
+
     var stateChosen = false;
     var stateFeatures;
     var stateHeader = document.getElementById("state");
@@ -167,7 +175,42 @@ var draw = async function(){
                 if(d2.id === d.id) return 1;
                 return 0;
             })
+
+            inputBox.value = abbrToFull[selectedState];
+
         }
+
+        inputBox.addEventListener('input',(evt)=>{
+            let val = inputBox.value.toLowerCase();
+            var matchRes = stateValues.filter(e=>(e.toLowerCase().indexOf(val)>-1
+            ||abbrToFull[e].toLowerCase().indexOf(val)>-1));
+            inputMatchResult.innerHTML = '';
+            for(let i=0;i<matchRes.length;i++){
+                var node = document.createElement('div')
+                node.setAttribute('class','state-input-result-item');
+                // console.log(node);
+                node.innerHTML = abbrToFull[matchRes[i]];
+                inputMatchResult.appendChild(node);
+                node.addEventListener('click',()=>{
+                    let stateId = '';
+                    for(let id in idToStates){
+                        if(matchRes[i]===idToStates[id]){
+                            stateId = id;
+                            break;
+                        }
+                    }
+                    let d = null;
+                    for(let i=0;i<stateFeatures.length;i++ ){
+                        if(stateId == stateFeatures[i].id){
+                            d = stateFeatures[i];
+                            break;
+                        }
+                    }
+                    onSelectState(d)
+                })
+            }
+
+        })
 
         var update = enter.append('path')
         .attr('class','state')
@@ -525,14 +568,12 @@ var draw = async function(){
 
 
     var selectedState = "NY";
-    var stateNameArea = document.getElementById('selectedState');
-    var yearRangeArea = document.getElementById('selectedRange');
-    var statePopAreas = document.querySelectorAll('.statePopulation');
 
     var part1 =document.getElementById('part2map');
     var btns = document.querySelectorAll('.pollutant');
-    let textarea =  document.getElementById("output");
-    var banner = document.querySelector('.pollutant-buttons-banner');
+    var inputBox = document.getElementById('state-input');
+    var inputMatchResult = document.getElementById('state-input-result');
+    
     
     for(let i=0;i<btns.length;i++){
         btns[i].onclick = ()=>{

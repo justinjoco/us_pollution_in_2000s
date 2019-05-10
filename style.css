@@ -125,17 +125,21 @@ h3{
 .state-input-box{
     width: calc(100% - 20px);
 }
-.state-input{
+#state-input{
     width: 250px;
     font-size: 1em;
     border: none;
     border-bottom: 2px solid #ffdb64;
 }
 
-.state-input-result{
+.state-input-result-item{
     font-size: 0.8em;
     border-left: 4px solid #ffdb64;
     padding-left: 10px;
     margin: 4px 0;
 }
 
+#state-input-result{
+    overflow: scroll;
+    height: 65px;
+}
