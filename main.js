@@ -444,7 +444,9 @@ var draw = async function(){
         let valueList = [];
         let stateList = [];
         
-        // console.log(pollutant_data[state]);
+
+      //  console.log(pollutant_data[currState]);
+
         for (let currYear = yearRange[0]; currYear<=yearRange[1]; currYear++){
             let state_count = 0;
             let total_pollutant = 0;
@@ -460,16 +462,25 @@ var draw = async function(){
             }
             valueList.push(total_pollutant/state_count);
         }
+        
         if (pollutant_data[currState] != undefined){
             for (let currYear = yearRange[0]; currYear<=yearRange[1]; currYear++){
                 // console.log(pollutant_data[currState]);
                 if (currYear in pollutant_data[currState]){
-                    stateList.push(pollutant_data[currState][currYear][activePollutant])
-                };
+                    stateList.push(pollutant_data[currState][currYear][activePollutant]);
+                }
             }
         }   
+
+        console.log(valueList);
+        console.log(stateList);
         return [valueList, stateList];
 
+    }
+
+    function interpolate(){
+
+        
     }
 
     function drawGraph(activeState, activePollutant){
@@ -478,8 +489,13 @@ var draw = async function(){
         let [avgData, stateData] = generateAvgData(pollutant_data, activePollutant, abbrToFull[activeState]);
 
         // y scales -> Energy Generated
-    
-        const yScale = d3.scaleLinear().domain([0, Math.max(d3.max(avgData), d3.max(stateData))]).range([chartHeight-50, 30]);
+        let stateDataMax;
+        if (stateData.length>=1) {
+            stateDataMax = d3.max(stateData);
+        }else{
+            stateDataMax = 0;
+        }
+        const yScale = d3.scaleLinear().domain([0, Math.max(d3.max(avgData), stateDataMax)]).range([chartHeight-50, 30]);
         var yearScale;
 
         function resizeSvgChart(){
@@ -529,7 +545,7 @@ var draw = async function(){
             .attr("class", "y axis label")
             .attr("x", -chartHeight / 2)
             .attr("y", 10)
-            .attr("font-size", "16px")
+            .attr("font-size", "14px")
             .attr("text-anchor", "middle")
             .attr("transform", "rotate(-90)")
             .text(yUnits);
@@ -555,13 +571,15 @@ var draw = async function(){
 
 
         // No data for Montana, Mississippi, New Mexico, Vermont, Nebraska
-        svgChart.append("path")
-            .datum(stateData)
-            .attr("class", "line")
-            .style("stroke", "#02d1ff")
-            .style('stroke-width','3')
-            .attr('d', line);
         
+        if (stateData.length>=1){
+            svgChart.append("path")
+                .datum(stateData)
+                .attr("class", "line")
+                .style("stroke", "#02d1ff")
+                .style('stroke-width','3')
+                .attr('d', line);
+        }
 
     }
 
