@@ -94,7 +94,7 @@ var draw = async function(){
         'NV': "Nevada",
         'NH': "New Hampshire",
         'NJ': "New Jersey",
-        'NM': "Nex Mexico",
+        'NM': "New Mexico",
         'NY': "New York",
         'NC': "North Carolina",
         'ND': "North Dakota",
@@ -443,9 +443,10 @@ var draw = async function(){
     function generateAvgData(pollutant_data, activePollutant, currState){
         let valueList = [];
         let stateList = [];
-        
+        let missingList = [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 
+        2012, 2013, 2014, 2015, 2016];
 
-      //  console.log(pollutant_data[currState]);
+        console.log(pollutant_data[currState]);
 
         for (let currYear = yearRange[0]; currYear<=yearRange[1]; currYear++){
             let state_count = 0;
@@ -463,18 +464,37 @@ var draw = async function(){
             valueList.push(total_pollutant/state_count);
         }
         
+        let tempYear = undefined;
+        let firstYear = undefined;
         if (pollutant_data[currState] != undefined){
             for (let currYear = yearRange[0]; currYear<=yearRange[1]; currYear++){
                 // console.log(pollutant_data[currState]);
                 if (currYear in pollutant_data[currState]){
                     stateList.push(pollutant_data[currState][currYear][activePollutant]);
+                    missingList.splice( missingList.indexOf(currYear), 1 );
+                    tempYear = currYear;
+                    if (firstYear == undefined) firstYear = currYear;
+                }
+                else {
+                    if (tempYear != undefined){
+                     //   pollutant_data[currState][currYear]=activePollutant;
+                     //   pollutant_data[currState][currYear][activePollutant] = pollutant_data[currState][tempYear][activePollutant];
+                        stateList.push(pollutant_data[currState][tempYear][activePollutant]);
+                    }
+                  
+
                 }
             }
         }   
 
-        console.log(valueList);
-        console.log(stateList);
-        return [valueList, stateList];
+        for (let currYear = yearRange[0]; currYear<firstYear; currYear++){
+            stateList.unshift(pollutant_data[currState][firstYear][activePollutant]);
+
+        }
+
+       // console.log(valueList);
+     //   console.log(stateList);
+        return [valueList, stateList, missingList];
 
     }
 
@@ -486,8 +506,8 @@ var draw = async function(){
     function drawGraph(activeState, activePollutant){
         clearGraph();
         
-        let [avgData, stateData] = generateAvgData(pollutant_data, activePollutant, abbrToFull[activeState]);
-
+        let [avgData, stateData, missingList] = generateAvgData(pollutant_data, activePollutant, abbrToFull[activeState]);
+        console.log(missingList);
         // y scales -> Energy Generated
         let stateDataMax;
         if (stateData.length>=1) {
