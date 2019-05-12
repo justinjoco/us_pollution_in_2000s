@@ -498,10 +498,7 @@ var draw = async function(){
 
     }
 
-    function interpolate(){
-
-        
-    }
+    
 
     function drawGraph(activeState, activePollutant){
         clearGraph();
@@ -581,25 +578,130 @@ var draw = async function(){
         
         svgChart.append("path")
             .datum(avgData)
+            .attr("id", "avgLine")
             .attr("class", "line")
             .style("stroke", "#826c64")
             .style('opacity',0.3)
             .attr('d', line);
 
-        // console.log(stateData.length);
-    
-
-
-        // No data for Montana, Mississippi, New Mexico, Vermont, Nebraska
-        
         if (stateData.length>=1){
             svgChart.append("path")
                 .datum(stateData)
+                .attr("id", "stateLine")
+                .attr("id", "stateLine")
                 .attr("class", "line")
                 .style("stroke", "#02d1ff")
                 .style('stroke-width','3')
                 .attr('d', line);
         }
+
+        var avgLine = document.getElementById("avgLine");
+        var stateLine  = document.getElementById("stateLine");
+
+        // console.log(stateData.length);
+        svgChart.on("mousemove", function (d) {
+                //Draw a vertical line cursor that follows mouse movement over the line graph
+                if (activeState !== undefined) {
+
+                    let [x, y] = d3.mouse(this);
+                    console.log("x: " + x);
+                    
+                    // console.log(activeState);
+
+                    if (x <= 50) {
+                        x = 50;
+
+                    }
+                    else if (x>=chartWidth-30){ 
+                        x = chartWidth-30;
+                    }
+                    else{
+                        svgChart.select("#line").remove();        
+
+                        svgChart.append("line")
+                            .style("stroke", "red")
+                            .attr("id", "line")
+                            .attr("x1", x)
+                            .attr("x2", x)
+                            .attr("y1", 0)
+                            .attr("y2", chartHeight-50);
+
+                    }
+
+
+                  
+               
+
+                    let avgPointY = findY(avgLine, x);
+                    let statePointY = findY(stateLine, x);
+
+                    svgChart.select("#avgPoint").remove(); 
+                    let avgCircle = svgChart.append("circle")
+                    .attr("cx", x)
+                    .attr("cy", avgPointY)
+                    .attr("id", "avgPoint")
+                    .attr("r", 4)
+                    .style("stroke", "black")
+                    .attr("opacity", 1)
+                    .style("fill", "grey");
+
+
+
+                    svgChart.select("#statePoint").remove(); 
+                    let stateCircle = svgChart.append("circle")
+                    .attr("cx", x)
+                    .attr("cy", statePointY)
+                    .attr("id", "statePoint")
+                    .attr("r", 4)
+                    .style("stroke", "blue")
+                    .attr("opacity", 1)
+                    .style("fill", "grey");
+
+
+
+
+                }
+            });
+
+
+            //Line cursor disappears upon leaving the line graph SVG
+            svgChart.on("mouseleave",function(d){
+                svgChart.selectAll("#line").remove();
+            });
+
+
+
+
+        function findY(path, x) {
+  var pathLength = path.getTotalLength()
+  var start = 0
+  var end = pathLength
+  var target = (start + end) / 2
+
+  // Ensure that x is within the range of the path
+  x = Math.max(x, path.getPointAtLength(0).x)
+  x = Math.min(x, path.getPointAtLength(pathLength).x)
+
+  // Walk along the path using binary search 
+  // to locate the point with the supplied x value
+  while (target >= start && target <= pathLength) {
+    var pos = path.getPointAtLength(target)
+
+    // use a threshold instead of strict equality 
+    // to handle javascript floating point precision
+    if (Math.abs(pos.x - x) < 0.001) {
+      return pos.y
+    } else if (pos.x > x) {
+      end = target
+    } else {
+      start = target
+    }
+    target = (start + end) / 2
+  }
+}
+        // No data for Montana, Mississippi, New Mexico, Vermont, Nebraska
+        
+
 
     }
 
