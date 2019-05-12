@@ -752,10 +752,10 @@ var draw = async function(){
 
                         if (differencePercent < 0){
                             
-                            outstring = "<font color=\"#02d1ff\">" + activeState + "'s</font> " + activePollutant+ " concentration "+ "is LOWER than the <font color=\"#d67e59\">national average's</font> by " + Math.abs(differencePercent).toFixed(2) + "%"; 
+                            outstring = "<font color=\"#02d1ff\">" + abbrToFull[activeState] + "'s</font> " + activePollutant+ " concentration "+ "is LOWER than the <font color=\"#d67e59\">national average's</font> by " + Math.abs(differencePercent).toFixed(2) + "%"; 
                         }else{
 
-                              outstring = "<font color=\"#02d1ff\">" + activeState + "'s</font> " + activePollutant+ " concentration" + " is HIGHER than the <font color=\"#d67e59\">national average's</font> by " + Math.abs(differencePercent).toFixed(2) + "%"; 
+                              outstring = "<font color=\"#02d1ff\">" + abbrToFull[activeState] + "'s</font> " + activePollutant+ " concentration" + " is HIGHER than the <font color=\"#d67e59\">national average's</font> by " + Math.abs(differencePercent).toFixed(2) + "%"; 
                         }
                         comparison_text.innerHTML = outstring;
                 
