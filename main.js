@@ -641,7 +641,7 @@ var draw = async function(){
                          let avgPointData = yPixToDataScale(avgPointY);
                          let statePointData = yPixToDataScale(statePointY);
 
-                         let differencePercent = (avgPointData - statePointData)/statePointData*100;
+                         let differencePercent = (statePointData - avgPointData )/avgPointData*100;
 
                         svgChart.select("#avgPoint").remove(); 
                         let avgCircle = svgChart.append("circle")
