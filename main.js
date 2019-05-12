@@ -588,7 +588,7 @@ var draw = async function(){
         var yAxis = d3.axisLeft(yScale);
         svgChart.append("g")
             .attr("class", "left axis")
-            .attr("transform", "translate(" + 40 + "," + 0 + ")")
+            .attr("transform", "translate(" + 50 + "," + 0 + ")")
             .call(yAxis);
         
         var yearArray = [];
@@ -602,13 +602,13 @@ var draw = async function(){
         var yearTickArray = [];
         svgChart.append("g")
             .attr("class", "bottom axis")
-            .attr("transform", "translate(50," + (chartHeight-50) + ")")
+            .attr("transform", "translate(60," + (chartHeight-40) + ")")
             .call(yearAxis);
     
         // x label
         svgChart.append("text")
             .attr("x", chartWidth / 2)
-            .attr("y", chartHeight - 8)
+            .attr("y", chartHeight )
             .attr("font-size", "18px")
             .attr("text-anchor", "middle")
             .text("Year")
@@ -617,7 +617,7 @@ var draw = async function(){
         // y label
         svgChart.append("text")
             .attr("x", -chartHeight / 2)
-            .attr("y", 10)
+            .attr("y", 15)
             .attr("font-size", "14px")
             .attr("text-anchor", "middle")
             .attr("transform", "rotate(-90)")
@@ -627,7 +627,7 @@ var draw = async function(){
 
         var area = d3.area()
         .x(function (d, i) {
-            return yearScale(i+yearRange[0])+50;
+            return yearScale(i+yearRange[0])+60;
         })
         .y1(function (d) {
             return yScale(d);
@@ -637,7 +637,7 @@ var draw = async function(){
 
         var line = d3.line()
         .x(function (d, i) {
-            return yearScale(i+yearRange[0])+50;
+            return yearScale(i+yearRange[0])+60;
         })
         .y(function (d) {
             return yScale(d);
@@ -692,12 +692,12 @@ var draw = async function(){
                     
                     // console.log(activeState);
 
-                    if (x <= 50) {
-                        x = 50;
+                    if (x <= 60) {
+                        x = 60;
 
                     }
-                    else if (x>=chartWidth-30){ 
-                        x = chartWidth-30;
+                    else if (x>=chartWidth-20){ 
+                        x = chartWidth-20;
                     }
                     else{
                         svgChart.select("#line").remove();        
