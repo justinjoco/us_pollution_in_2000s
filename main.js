@@ -639,7 +639,7 @@ var draw = async function(){
             .datum(avgData)
             .attr("id", "avgLine")
             .attr("class", "line")
-            .style("stroke", "#826c64")
+            .style("stroke", "#d67e59")
             .style('opacity',0.3)
             .attr('d', line);
 
@@ -708,7 +708,7 @@ var draw = async function(){
                          let avgPointData = yPixToDataScale(avgPointY);
                          let statePointData = yPixToDataScale(statePointY);
 
-                         let differencePercent = (avgPointData - statePointData)/statePointData*100;
+                         let differencePercent = (statePointData - avgPointData )/avgPointData*100;
 
                         svgChart.select("#avgPoint").remove(); 
                         let avgCircle = svgChart.append("circle")
@@ -718,7 +718,7 @@ var draw = async function(){
                         .attr("r", 4)
                         .style("stroke", "white")
                         .attr("opacity", 1)
-                        .style("fill", "#826c64");
+                        .style("fill", "#d67e59");
 
 
                         svgChart.select("#statePoint").remove(); 
@@ -735,10 +735,10 @@ var draw = async function(){
 
                         if (differencePercent < 0){
                             
-                            outstring = activeState + "'s " + activePollutant+ " concentration "+ "is LOWER than the national average by " + Math.abs(differencePercent).toFixed(2) + "%"; 
+                            outstring = "<font color=\"#02d1ff\">" + activeState + "'s</font> " + activePollutant+ " concentration "+ "is LOWER than the <font color=\"#d67e59\">national average's</font> by " + Math.abs(differencePercent).toFixed(2) + "%"; 
                         }else{
 
-                              outstring = activeState + "'s " + activePollutant+ " concentration" + " is HIGHER than the national average by " + Math.abs(differencePercent).toFixed(2) + "%"; 
+                              outstring = "<font color=\"#02d1ff\">" + activeState + "'s</font> " + activePollutant+ " concentration" + " is HIGHER than the <font color=\"#d67e59\">national average's</font> by " + Math.abs(differencePercent).toFixed(2) + "%"; 
                         }
                         comparison_text.innerHTML = outstring;
                 
