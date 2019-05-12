@@ -163,6 +163,8 @@ var draw = async function(){
             return colorScale(d.population)
         });
 
+        var clearTooltipTimer = null;
+
         function onSelectState(d){
             selectedState = idToStates[d.id];
             // stateHeader.innerHTML = abbrToFull[selectedState];
@@ -170,18 +172,37 @@ var draw = async function(){
             if (activePollutant!=null){
                 drawGraph(selectedState, activePollutant);
             }
-            
-            popText.attr('opacity',(d2,id2)=>{
-                if(d2.id === d.id) return 1;
-                return 0;
-            })
 
             inputBox.value = abbrToFull[selectedState];
-
+        }
+        function onHoverState(d){
+            popText.attr('opacity',(d2,id2)=>{
+                if(d2.id === d.id || idToStates[d2.id] ===selectedState) return 1;
+                return 0;
+            })
+            popTooltip.style('opacity',(d2,id2)=>{
+                if(d2.id === d.id || idToStates[d2.id] ===selectedState ) return 0.3;
+                return 0;
+            })
+            clearTimeout(clearTooltipTimer);
+            clearTooltipTimer = setTimeout(() => {
+                popText.attr('opacity',(d2,id2)=>{
+                    if(idToStates[d2.id] ===selectedState) return 1;
+                    return 0;
+                })
+                popTooltip.style('opacity',(d2,id2)=>{
+                    if(idToStates[d2.id] ===selectedState ) return 0.3;
+                    return 0;
+                })
+            }, 1000);
         }
 
         inputBox.addEventListener('input',(evt)=>{
             let val = inputBox.value.toLowerCase();
+            showMatchResult(val);
+        })
+
+        function showMatchResult(val){
             var matchRes = stateValues.filter(e=>(e.toLowerCase().indexOf(val)>-1
             ||abbrToFull[e].toLowerCase().indexOf(val)>-1));
             inputMatchResult.innerHTML = '';
@@ -209,24 +230,23 @@ var draw = async function(){
                     onSelectState(d)
                 })
             }
-
-        })
+        }
+        showMatchResult('');
 
         var update = enter.append('path')
         .attr('class','state')
         .attr('d',path)
+        .on('mouseover',onHoverState)
         .on('click',onSelectState)
         .attr('fill',d=>{
             return colorScale(d.population)
         });
 
-        var popText = enter.append('text').text(d=>d.population+'k')
-        .attr('font-size','30px')
-        .attr('pointer-event','none')
-        .attr('fill','#4f342a')
-        .attr('text-anchor','middle')
-        .attr('alignment-baseline','central')
-        .attr('opacity','0')
+        var popTooltip = enter.append('rect')
+        .attr('class','tooltip')
+        .style('opacity',d=>{ if(idToStates[d.id]===selectedState)return '0.3'; return '0'})
+        .attr("rx", 10)
+        .attr("ry", 10)
         .attr('transform',d=>{
             let xarr = d.geometry.coordinates[0][0].map(e=>e[0]);
             let yarr = d.geometry.coordinates[0][0].map(e=>e[1])
@@ -236,13 +256,31 @@ var draw = async function(){
             let maxY = d3.max(yarr);
             return 'translate('+parseInt((minX+maxX)/2)+','+parseInt((minY+maxY)/2)+')'
         })
+
+        var popText = enter
+        .append('text').text(d=>(idToStates[d.id]+': '+d.population+'k'))
+        .attr('font-size','22px')
+        .attr('fill','white')
+        // .attr('text-anchor','middle')
+        // .attr('alignment-baseline','central')
+        .attr('opacity',d=>{ if(idToStates[d.id]===selectedState)return '1'; return '0'})
+        .attr('transform',d=>{
+            let xarr = d.geometry.coordinates[0][0].map(e=>e[0]);
+            let yarr = d.geometry.coordinates[0][0].map(e=>e[1])
+            let minX = d3.min(xarr);
+            let maxX = d3.max(xarr);
+            let minY = d3.min(yarr);
+            let maxY = d3.max(yarr);
+            return 'translate('+parseInt((minX+maxX)/2)+','+parseInt((minY+maxY)/2)+')'
+        })
+        .on('mouseover',onHoverState)
         .on('click',onSelectState)
         
         var updateColor = ()=>{
             update.attr('fill',(d,id)=>{
                 return colorScale(stateFeatures[id].population)
             })
-            popText.text((d,id)=>stateFeatures[id].population+'k')
+            popText.text((d,id)=>idToStates[d.id]+': '+stateFeatures[id].population+'k')
 
         }
 
@@ -446,7 +484,7 @@ var draw = async function(){
         let missingList = [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 
         2012, 2013, 2014, 2015, 2016];
 
-        console.log(pollutant_data[currState]);
+        // console.log(pollutant_data[currState]);
 
         for (let currYear = yearRange[0]; currYear<=yearRange[1]; currYear++){
             let state_count = 0;
@@ -504,7 +542,7 @@ var draw = async function(){
         clearGraph();
         
         let [avgData, stateData, missingList] = generateAvgData(pollutant_data, activePollutant, abbrToFull[activeState]);
-        console.log(missingList);
+        // console.log(missingList);
         // y scales -> Energy Generated
         let stateDataMax;
         if (stateData.length>=1) {
@@ -552,23 +590,33 @@ var draw = async function(){
     
         // x label
         svgChart.append("text")
-            .attr("class", "x axis label")
             .attr("x", chartWidth / 2)
             .attr("y", chartHeight - 8)
             .attr("font-size", "18px")
             .attr("text-anchor", "middle")
-            .text("Year");
+            .text("Year")
+            .attr("class", "axis-label");
 
         // y label
         svgChart.append("text")
-            .attr("class", "y axis label")
             .attr("x", -chartHeight / 2)
             .attr("y", 10)
             .attr("font-size", "14px")
             .attr("text-anchor", "middle")
             .attr("transform", "rotate(-90)")
-            .text(yUnits);
+            .text(yUnits)
+            .attr("class", "axis-label");
 
+
+        var area = d3.area()
+        .x(function (d, i) {
+            return yearScale(i+yearRange[0])+50;
+        })
+        .y1(function (d) {
+            return yScale(d);
+        })
+        .y0(yScale(yScale.domain()[0]))
+        .curve(d3.curveCardinal);
 
         var line = d3.line()
         .x(function (d, i) {
@@ -576,8 +624,17 @@ var draw = async function(){
         })
         .y(function (d) {
             return yScale(d);
-        }).curve(d3.curveCardinal);
+        })
+        .curve(d3.curveCardinal);
         
+        svgChart.append("path")
+            .datum(avgData)
+            .attr("class", "line")
+            .style("stroke", "#826c64")
+            .style('fill','#826c64')
+            .style('opacity',0.3)
+            .attr('d', area);
+
         svgChart.append("path")
             .datum(avgData)
             .attr("id", "avgLine")
@@ -589,7 +646,15 @@ var draw = async function(){
         if (stateData.length>=1){
             svgChart.append("path")
                 .datum(stateData)
-                .attr("id", "stateLine")
+                .attr("class", "line")
+                .style("stroke", "#02d1ff")
+                .style("fill", "#02d1ff")
+                .style('opacity',0.3)
+                .style('stroke-width','0')
+                .attr('d', area);
+
+            svgChart.append("path")
+                .datum(stateData)
                 .attr("id", "stateLine")
                 .attr("class", "line")
                 .style("stroke", "#02d1ff")
@@ -606,7 +671,7 @@ var draw = async function(){
                 if (activeState !== undefined) {
 
                     let [x, y] = d3.mouse(this);
-                    console.log("x: " + x);
+                    // console.log("x: " + x);
                     
                     // console.log(activeState);
 
@@ -620,8 +685,10 @@ var draw = async function(){
                     else{
                         svgChart.select("#line").remove();        
 
+                        //vertical assistive line
                         svgChart.append("line")
-                            .style("stroke", "red")
+                            .style("stroke", "#ffdb64")
+                            .style('stroke-width', '4px')
                             .attr("id", "line")
                             .attr("x1", x)
                             .attr("x2", x)
@@ -649,10 +716,9 @@ var draw = async function(){
                         .attr("cy", avgPointY)
                         .attr("id", "avgPoint")
                         .attr("r", 4)
-                        .style("stroke", "black")
+                        .style("stroke", "white")
                         .attr("opacity", 1)
-                        .style("fill", "grey");
-
+                        .style("fill", "#826c64");
 
 
                         svgChart.select("#statePoint").remove(); 
@@ -661,9 +727,9 @@ var draw = async function(){
                         .attr("cy", statePointY)
                         .attr("id", "statePoint")
                         .attr("r", 4)
-                        .style("stroke", "blue")
+                        .style("stroke", "white")
                         .attr("opacity", 1)
-                        .style("fill", "grey");
+                        .style("fill", "#02d1ff");
 
                         let outstring;
 

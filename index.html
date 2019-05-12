@@ -14,41 +14,41 @@
 
 <body>
   <div id="part2map">
-    <center><h1>US Population V.S. Air Pollution in 2000's</h1></center>
-    <svg id="yearSlider"></svg>
-    <div style="margin: 0 40px" class="row">
-      <div style="width:50%">
-        <div class="state-input-box"><span style="margin-right:1em">State Name</span>
+    <div style="margin: 20px 0 0 0; height: 140px">
+      <center><h1>US Population V.S. Air Pollution in 2000's</h1></center>
+      <svg id="yearSlider"></svg>
+    </div>
+    <div style="margin: 0 40px; height: calc(100vh - 180px)" class="row">
+      <div class="column">
+        <div class="state-input-box"><span class="column-label" style="margin-right:1em">Population of State</span>
           <input id="state-input" placeholder="State Name, e.g. New York, or NY" value="New York"></input>
-        </div>
           <div id="state-input-result">
-            <!-- <div class="state-input-result-item">New York</div> -->
-          </div>
+            <div class="state-input-result-item">New York</div>
+            </div>
+        </div>
+        
         <svg id="map"></svg>
+        <footer>
+          <p> 
+            INFO5100 Final Project, Copyright &copy; 2019 <br>
+            Justin Joco, Zeya Peng, Zidong(Zoey) Zhang
+          </p>
+        </footer>
       </div>
-      <div style="width:50%">
+      <div class="column">
         <div class="pollutant-buttons-banner">
-          <div style="line-height: 2em;">Show Concentration </div>
+          <div class="column-label" style="line-height: 2em;">Show Concentration </div>
           <div class="pollutant pollutant-chosen">CO</div>
           <div class="pollutant">NO2</div>
           <div class="pollutant">O3</div>
           <div class="pollutant">SO2</div>
         </div>
         <svg id="bar_chart" ></svg>
-        <center>
-       <h3 id="comparison">*Mouse over the line graph*</h3>
-     </center>
+        
+       <h4 id="comparison">*Mouse over the line graph*</h4>
+       
       </div>
     </div>
-
-
-
-    <footer style="margin: 0 40px">
-      <p> 
-        INFO5100 Final Project, Copyright &copy; 2019 <br>
-        Justin Joco, Zeya Peng, Zidong(Zoey) Zhang
-      </p>
-    </footer>
   </div>
 
   <script type="text/javascript" src="main.js"></script>
