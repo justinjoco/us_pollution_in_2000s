@@ -155,7 +155,7 @@ h3{
     overflow-y: scroll;
     overflow-x: hidden;
     height: 80px;
-    width: 550px;
+    width: calc(100% - 60px);
 }
 
 #state-input-result::-webkit-scrollbar {
@@ -200,3 +200,10 @@ h3{
     pointer-events: none;
     transition: opacity 0.5s;
 }
+
+.legend-rect { 
+    fill: url(#Gradient1);
+}
+.stop1 { stop-color: rgb(209,61,0); }
+.stop2 { stop-color: rgb(249,195,11);}
+.stop3 { stop-color: rgb(2, 209, 255);}

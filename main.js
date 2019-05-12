@@ -142,17 +142,32 @@ var draw = async function(){
         stateFeatures = topojson.feature(us,us.objects.states).features;
         updatePopulation()
 
-        const colorScale = d3.scaleSequential()
+        const orange = d3.rgb(209,61,0);
+        const yellow = d3.rgb(249,195,11);
+        const blue = d3.rgb(2, 209, 255);
 
-        .domain([minPop-1,maxPop+1])
-        .interpolator(t=>{
-            let rgb = d3.rgb(209*t+249*(1-t), 61*t+195*(1-t), 0*t+11*(1-t));
-            let c = d3.color(rgb);
-            c.opacity = Math.min(20*t,1);
+        const colorScale = d3.scaleSequential()
+        .domain([minPop,maxPop])
+        .interpolator(t2=>{
+            let rgb, c;
+            if(t2<0.5){
+                let t = t2*2;
+                rgb = d3.rgb(yellow.r*t+blue.r*(1-t), yellow.g*t+blue.g*(1-t),  yellow.b*t+blue.b*(1-t));
+            }else{
+                let t = (t2-0.5)*2;
+                rgb = d3.rgb(orange.r*t+yellow.r*(1-t), orange.g*t+yellow.g*(1-t),  orange.b*t+yellow.b*(1-t));
+            }
+            c = d3.color(rgb);
+            
 
             return c;
         })
-        
+
+        var legendSvg = d3.select('svg#legend');
+        legendSvg.append('rect').attr('class','legend-rect')
+        .attr('x',0).attr('y',30).attr('width',500).attr('height',20);
+        legendSvg.append('text').text((maxPop)+'k').attr('x',0).attr('y',20)
+        legendSvg.append('text').text((minPop)+'k').attr('x',470).attr('y',20)
         var selection = mapSvg.append('g')
         .attr('class','states')
         .selectAll('path')
@@ -453,6 +468,8 @@ var draw = async function(){
             minPop = Math.min(popByYear[year][state],minPop);
         }
     }
+    maxPop = Math.ceil(maxPop)+1;
+    minPop = Math.floor(minPop)-1
     
     var svgChart = d3.select("#bar_chart")
     .attr('height',400)
