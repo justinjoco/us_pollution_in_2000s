@@ -515,6 +515,8 @@ var draw = async function(){
         const yScale = d3.scaleLinear().domain([0, Math.max(d3.max(avgData), stateDataMax)]).range([chartHeight-50, 30]);
         var yearScale;
 
+        const yPixToDataScale = d3.scaleLinear().domain([chartHeight-50, 30]).range([0, Math.max(d3.max(avgData), stateDataMax)]);
+
         function resizeSvgChart(){
             let width = document.body.clientWidth - sidePadding*2;
             svgChart.attr('width',width/2);
@@ -597,7 +599,7 @@ var draw = async function(){
 
         var avgLine = document.getElementById("avgLine");
         var stateLine  = document.getElementById("stateLine");
-
+        var comparison_text = document.getElementById("comparison");
         // console.log(stateData.length);
         svgChart.on("mousemove", function (d) {
                 //Draw a vertical line cursor that follows mouse movement over the line graph
@@ -630,74 +632,96 @@ var draw = async function(){
 
 
                   
-               
+                    if (stateLine != null){
 
-                    let avgPointY = findY(avgLine, x);
-                    let statePointY = findY(stateLine, x);
-
-                    svgChart.select("#avgPoint").remove(); 
-                    let avgCircle = svgChart.append("circle")
-                    .attr("cx", x)
-                    .attr("cy", avgPointY)
-                    .attr("id", "avgPoint")
-                    .attr("r", 4)
-                    .style("stroke", "black")
-                    .attr("opacity", 1)
-                    .style("fill", "grey");
+                        let avgPointY = findY(avgLine, x);
+                        let statePointY = findY(stateLine, x);
 
 
+                         let avgPointData = yPixToDataScale(avgPointY);
+                         let statePointData = yPixToDataScale(statePointY);
 
-                    svgChart.select("#statePoint").remove(); 
-                    let stateCircle = svgChart.append("circle")
-                    .attr("cx", x)
-                    .attr("cy", statePointY)
-                    .attr("id", "statePoint")
-                    .attr("r", 4)
-                    .style("stroke", "blue")
-                    .attr("opacity", 1)
-                    .style("fill", "grey");
+                         let differencePercent = (avgPointData - statePointData)/statePointData*100;
+
+                        svgChart.select("#avgPoint").remove(); 
+                        let avgCircle = svgChart.append("circle")
+                        .attr("cx", x)
+                        .attr("cy", avgPointY)
+                        .attr("id", "avgPoint")
+                        .attr("r", 4)
+                        .style("stroke", "black")
+                        .attr("opacity", 1)
+                        .style("fill", "grey");
 
 
 
+                        svgChart.select("#statePoint").remove(); 
+                        let stateCircle = svgChart.append("circle")
+                        .attr("cx", x)
+                        .attr("cy", statePointY)
+                        .attr("id", "statePoint")
+                        .attr("r", 4)
+                        .style("stroke", "blue")
+                        .attr("opacity", 1)
+                        .style("fill", "grey");
 
+                        let outstring;
+
+                        if (differencePercent < 0){
+                            
+                            outstring = activeState + "'s " + activePollutant+ " concentration "+ "is lower than the national average by " + Math.abs(differencePercent).toFixed(2) + "%"; 
+                        }else{
+
+                              outstring = activeState + "'s " + activePollutant+ " concentration" + " is larger than the national average by " + Math.abs(differencePercent).toFixed(2) + "%"; 
+                        }
+                        comparison_text.innerHTML = outstring;
+                
+                    }
+                    else{
+
+                        comparison_text.innerHTML = "No pollutant data available for " + abbrToFull[activeState];
+                    }
                 }
             });
 
 
             //Line cursor disappears upon leaving the line graph SVG
             svgChart.on("mouseleave",function(d){
+                svgChart.selectAll("#avgPoint").remove(); 
+                svgChart.selectAll("#statePoint").remove(); 
                 svgChart.selectAll("#line").remove();
+                comparison_text.innerHTML = "*Mouse over the line graph*";
             });
 
 
 
-
+        //Reference: https://stackoverflow.com/questions/15578146/get-y-coordinate-of-point-along-svg-path-with-given-an-x-coordinate
         function findY(path, x) {
-  var pathLength = path.getTotalLength()
-  var start = 0
-  var end = pathLength
-  var target = (start + end) / 2
+          var pathLength = path.getTotalLength()
+          var start = 0
+          var end = pathLength
+          var target = (start + end) / 2
 
-  // Ensure that x is within the range of the path
-  x = Math.max(x, path.getPointAtLength(0).x)
-  x = Math.min(x, path.getPointAtLength(pathLength).x)
+          // Ensure that x is within the range of the path
+          x = Math.max(x, path.getPointAtLength(0).x)
+          x = Math.min(x, path.getPointAtLength(pathLength).x)
 
-  // Walk along the path using binary search 
-  // to locate the point with the supplied x value
-  while (target >= start && target <= pathLength) {
-    var pos = path.getPointAtLength(target)
+          // Walk along the path using binary search 
+          // to locate the point with the supplied x value
+          while (target >= start && target <= pathLength) {
+            var pos = path.getPointAtLength(target)
 
-    // use a threshold instead of strict equality 
-    // to handle javascript floating point precision
-    if (Math.abs(pos.x - x) < 0.001) {
-      return pos.y
-    } else if (pos.x > x) {
-      end = target
-    } else {
-      start = target
-    }
-    target = (start + end) / 2
-  }
+            // use a threshold instead of strict equality 
+            // to handle javascript floating point precision
+            if (Math.abs(pos.x - x) < 0.001) {
+              return pos.y
+            } else if (pos.x > x) {
+              end = target
+            } else {
+              start = target
+            }
+            target = (start + end) / 2
+          }
 }
         // No data for Montana, Mississippi, New Mexico, Vermont, Nebraska
         
