@@ -669,10 +669,10 @@ var draw = async function(){
 
                         if (differencePercent < 0){
                             
-                            outstring = activeState + "'s " + activePollutant+ " concentration "+ "is lower than the national average by " + Math.abs(differencePercent).toFixed(2) + "%"; 
+                            outstring = activeState + "'s " + activePollutant+ " concentration "+ "is LOWER than the national average by " + Math.abs(differencePercent).toFixed(2) + "%"; 
                         }else{
 
-                              outstring = activeState + "'s " + activePollutant+ " concentration" + " is larger than the national average by " + Math.abs(differencePercent).toFixed(2) + "%"; 
+                              outstring = activeState + "'s " + activePollutant+ " concentration" + " is HIGHER than the national average by " + Math.abs(differencePercent).toFixed(2) + "%"; 
                         }
                         comparison_text.innerHTML = outstring;
                 
