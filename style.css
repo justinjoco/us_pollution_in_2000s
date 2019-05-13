@@ -1,10 +1,8 @@
 h1{
-    /* font-family: Corbel; */
     color: #4F342A;
     margin-top: 0;
 }
 text{
-    /* font-family: Corbel; */
     color: #4F342A;
 }
 body{
@@ -167,7 +165,6 @@ h3{
  
 #state-input-result::-webkit-scrollbar-thumb {
   background-color: #ffdb64;
-  /* outline: 1px solid slategrey; */
 }
 
 .column{

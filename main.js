@@ -194,7 +194,6 @@ var draw = async function(){
 
         function onSelectState(d){
             selectedState = idToStates[d.id];
-            // stateHeader.innerHTML = abbrToFull[selectedState];
          
             if (activePollutant!=null){
                 drawGraph(selectedState, activePollutant);
@@ -236,7 +235,6 @@ var draw = async function(){
             for(let i=0;i<matchRes.length;i++){
                 var node = document.createElement('div')
                 node.setAttribute('class','state-input-result-item');
-                // console.log(node);
                 node.innerHTML = abbrToFull[matchRes[i]];
                 inputMatchResult.appendChild(node);
                 node.addEventListener('click',()=>{
@@ -288,8 +286,6 @@ var draw = async function(){
         .append('text').text(d=>(idToStates[d.id]+': '+d.population+'k'))
         .attr('font-size','22px')
         .attr('fill','white')
-        // .attr('text-anchor','middle')
-        // .attr('alignment-baseline','central')
         .attr('opacity',d=>{ if(idToStates[d.id]===selectedState)return '1'; return '0'})
         .attr('transform',d=>{
             let xarr = d.geometry.coordinates[0][0].map(e=>e[0]);
@@ -448,7 +444,6 @@ var draw = async function(){
                 nYear++;
             }
         }
-        // console.log(nYear,pop)
         return pop===0?'NA':Math.floor(pop/nYear);
     }
 
@@ -516,7 +511,6 @@ var draw = async function(){
         let missingList = [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 
         2012, 2013, 2014, 2015, 2016];
 
-        // console.log(pollutant_data[currState]);
 
         for (let currYear = yearRange[0]; currYear<=yearRange[1]; currYear++){
             let state_count = 0;
@@ -524,7 +518,7 @@ var draw = async function(){
            
            
             for (let state in pollutant_data){
-              //  console.log(state);
+
                 if (currYear in pollutant_data[state]){
                     total_pollutant += pollutant_data[state][currYear][activePollutant];
                     state_count++;
@@ -538,7 +532,7 @@ var draw = async function(){
         let firstYear = undefined;
         if (pollutant_data[currState] != undefined){
             for (let currYear = yearRange[0]; currYear<=yearRange[1]; currYear++){
-                // console.log(pollutant_data[currState]);
+
                 if (currYear in pollutant_data[currState]){
                     stateList.push(pollutant_data[currState][currYear][activePollutant]);
                     missingList.splice( missingList.indexOf(currYear), 1 );
@@ -547,8 +541,7 @@ var draw = async function(){
                 }
                 else {
                     if (tempYear != undefined){
-                     //   pollutant_data[currState][currYear]=activePollutant;
-                     //   pollutant_data[currState][currYear][activePollutant] = pollutant_data[currState][tempYear][activePollutant];
+
                         stateList.push(pollutant_data[currState][tempYear][activePollutant]);
                     }
                   
@@ -573,7 +566,6 @@ var draw = async function(){
         clearGraph();
         
         let [avgData, stateData, missingList] = generateAvgData(pollutant_data, activePollutant, abbrToFull[activeState]);
-        // console.log(missingList);
         // y scales -> Energy Generated
         let stateDataMax;
         if (stateData.length>=1) {
@@ -711,9 +703,6 @@ var draw = async function(){
                 if (activeState !== undefined) {
 
                     let [x, y] = d3.mouse(this);
-                    // console.log("x: " + x);
-                    
-                    // console.log(activeState);
 
                     if (x <= 60) {
                         x = 60;
