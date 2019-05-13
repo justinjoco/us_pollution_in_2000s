@@ -849,6 +849,9 @@ var draw = async function(){
         btns[i].onclick = ()=>{
             activePollutant = btns[i].innerHTML;
             comparison_text.innerHTML = "Mouse over the line graph";
+            svgChart.selectAll("#avgPoint").remove(); 
+            svgChart.selectAll("#statePoint").remove(); 
+            svgChart.selectAll("#line").remove();
             for(let j=0;j<btns.length;j++){
                 if(btns[j].innerHTML === activePollutant){
                     btns[j].setAttribute('class','pollutant-chosen pollutant');
