@@ -498,6 +498,8 @@ var draw = async function(){
     CO: ppm
 
     */
+
+    //Clear the line graph's axes, labels, and lines
     function clearGraph(){
 
         svgChart.selectAll("path.line").remove();
@@ -506,6 +508,7 @@ var draw = async function(){
         svgChart.selectAll(".line").remove();
     }
 
+    //Create list of state's pollutant data for a given polutation and list of nat'l averaged data of pollutants
     function generateAvgData(pollutant_data, activePollutant, currState){
         let valueList = [];
         let stateList = [];
@@ -564,7 +567,7 @@ var draw = async function(){
     }
 
     
-
+    //Draw the line graphs
     function drawGraph(activeState, activePollutant){
         clearGraph();
         
@@ -577,11 +580,16 @@ var draw = async function(){
         }else{
             stateDataMax = 0;
         }
+
+        //Map data to pixels
         const yScale = d3.scaleLinear().domain([0, Math.max(d3.max(avgData), stateDataMax)]).range([chartHeight-50, 30]);
         var yearScale;
 
+
+        //Map pixels to data
         const yPixToDataScale = d3.scaleLinear().domain([chartHeight-50, 30]).range([0, Math.max(d3.max(avgData), stateDataMax)]);
 
+        //Resize svg chart depending on year range
         function resizeSvgChart(){
             let width = document.body.clientWidth - sidePadding*2;
             svgChart.attr('width',width/2);
@@ -608,7 +616,7 @@ var draw = async function(){
         var yearAxis = d3.axisBottom(yearScale).tickValues(yearArray)
         .tickFormat(function(d,i){ return d; });
     
-        // Create x axis and get array of x pixel locations of the month ticks
+        // Create x axis 
         var yearTickArray = [];
         svgChart.append("g")
             .attr("class", "bottom axis")
@@ -635,6 +643,7 @@ var draw = async function(){
             .attr("class", "axis-label");
 
 
+        //Draw line graphs (curved) and area underneath
         var area = d3.area()
         .x(function (d, i) {
             return yearScale(i+yearRange[0])+60;
@@ -670,6 +679,8 @@ var draw = async function(){
             .style('opacity',0.3)
             .attr('d', line);
 
+
+        //Draw state line if there's data available
         if (stateData.length>=1){
             svgChart.append("path")
                 .datum(stateData)
@@ -689,10 +700,11 @@ var draw = async function(){
                 .attr('d', line);
         }
 
+        //Grab the graphed lines and comparison text
         var avgLine = document.getElementById("avgLine");
         var stateLine  = document.getElementById("stateLine");
         var comparison_text = document.getElementById("comparison");
-        // console.log(stateData.length);
+       
         svgChart.on("mousemove", function (d) {
                 //Draw a vertical line cursor that follows mouse movement over the line graph
                 if (activeState !== undefined) {
@@ -725,7 +737,7 @@ var draw = async function(){
                     }
 
 
-                  
+                    //Calculate the percent difference between the state and average data points for at a given x value. Output percent difference.
                     if (stateLine != null){
 
                         let avgPointY = findY(avgLine, x);
@@ -789,6 +801,8 @@ var draw = async function(){
 
 
         //Reference: https://stackoverflow.com/questions/15578146/get-y-coordinate-of-point-along-svg-path-with-given-an-x-coordinate
+
+        //Calculates the y value at a given x along a path
         function findY(path, x) {
           var pathLength = path.getTotalLength()
           var start = 0
@@ -822,7 +836,7 @@ var draw = async function(){
 
     }
 
-
+    //Default state is NY
     var selectedState = "NY";
 
     var btns = document.querySelectorAll('.pollutant');
@@ -841,8 +855,10 @@ var draw = async function(){
                 }
                 
             }
+            //Change concentration units depending on active pollutant
             if (activePollutant === "CO" || activePollutant === "O3"){yUnits = "Parts per million";} else{ yUnits = "Parts per billion";}
 
+            //Draw graph based on selected state and chosen pollutant
             drawGraph(selectedState, activePollutant);
         }
     }
