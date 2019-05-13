@@ -206,9 +206,9 @@ h3{
 .legend-rect { 
     fill: url(#Gradient1);
 }
-.stop1 { stop-color: rgb(209,61,0); }
+.stop1 { stop-color: rgb(2, 209, 255);}
 .stop2 { stop-color: rgb(249,195,11);}
-.stop3 { stop-color: rgb(2, 209, 255);}
+.stop3 { stop-color: rgb(209,61,0);}
 
 #comparison{
     height: 2em;

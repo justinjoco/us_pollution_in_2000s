@@ -163,11 +163,22 @@ var draw = async function(){
             return c;
         })
 
-        var legendSvg = d3.select('svg#legend');
+        var legendSvg = d3.select('svg#legend')
+        .attr('width',"500" )
+        .attr('height',"60");
+        
         legendSvg.append('rect').attr('class','legend-rect')
-        .attr('x',0).attr('y',30).attr('width',500).attr('height',20);
-        legendSvg.append('text').text((maxPop)+'k').attr('x',0).attr('y',20)
-        legendSvg.append('text').text((minPop)+'k').attr('x',470).attr('y',20)
+        .attr('x',0).attr('y',0).attr('width',500).attr('height',30);
+        legendSvg.append('text').text((maxPop)+'k').attr('x',450).attr('y',50)
+        legendSvg.append('text').text((minPop)+'k').attr('x',0).attr('y',50);
+
+        var triangleData = [[0,0],[500,0],[0,20],[0,0]];
+        legendSvg.append('path')
+        .attr('d',(d3.line()
+            .x(d=>d[0])
+            .y(d=>d[1]))(triangleData))
+        .attr('fill','white');
+
         var selection = mapSvg.append('g')
         .attr('class','states')
         .selectAll('path')
