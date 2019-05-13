@@ -78,13 +78,13 @@ html{
     border-radius: 10px;
 }
 .pollutant:hover{
-    background: #6ee4ff;
-    border: 1px solid #6ee4ff;
+    background: #826c64;
+    border: 1px solid #826c64;
     color: white;
 }
 .pollutant-chosen{
-    background: #02d1ff;
-    border: 1px solid #02d1ff;
+    background: #826c64;
+    border: 1px solid #826c64;
     color: white;
 }
 #back{

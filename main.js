@@ -547,8 +547,7 @@ var draw = async function(){
 
         }
 
-       // console.log(valueList);
-     //   console.log(stateList);
+
         return [valueList, stateList, missingList];
 
     }
@@ -647,8 +646,8 @@ var draw = async function(){
         svgChart.append("path")
             .datum(avgData)
             .attr("class", "line")
-            .style("stroke", "#826c64")
-            .style('fill','#826c64')
+            .style("stroke", "#02d1ff")
+            .style('fill','#02d1ff')
             .style('opacity',0.3)
             .attr('d', area);
 
@@ -656,7 +655,7 @@ var draw = async function(){
             .datum(avgData)
             .attr("id", "avgLine")
             .attr("class", "line")
-            .style("stroke", "#d67e59")
+            .style("stroke", "#02d1ff")
             .style('opacity',0.3)
             .attr('d', line);
 
@@ -664,8 +663,8 @@ var draw = async function(){
             svgChart.append("path")
                 .datum(stateData)
                 .attr("class", "line")
-                .style("stroke", "#02d1ff")
-                .style("fill", "#02d1ff")
+                .style("stroke", "#826c64")
+                .style("fill", "#826c64")
                 .style('opacity',0.3)
                 .style('stroke-width','0')
                 .attr('d', area);
@@ -674,7 +673,7 @@ var draw = async function(){
                 .datum(stateData)
                 .attr("id", "stateLine")
                 .attr("class", "line")
-                .style("stroke", "#02d1ff")
+                .style("stroke", "#d67e59")
                 .style('stroke-width','3')
                 .attr('d', line);
         }
@@ -735,7 +734,7 @@ var draw = async function(){
                         .attr("r", 4)
                         .style("stroke", "white")
                         .attr("opacity", 1)
-                        .style("fill", "#d67e59");
+                        .style("fill", "#02d1ff");
 
 
                         svgChart.select("#statePoint").remove(); 
@@ -746,16 +745,16 @@ var draw = async function(){
                         .attr("r", 4)
                         .style("stroke", "white")
                         .attr("opacity", 1)
-                        .style("fill", "#02d1ff");
+                        .style("fill", "#d67e59");
 
                         let outstring;
 
                         if (differencePercent < 0){
                             
-                            outstring = "<font color=\"#02d1ff\">" + abbrToFull[activeState] + "'s</font> " + activePollutant+ " concentration "+ "is LOWER than the <font color=\"#d67e59\">national average's</font> by " + Math.abs(differencePercent).toFixed(2) + "%"; 
+                            outstring = "<font color=\"#d67e59\">" + abbrToFull[activeState] + "'s</font> " + activePollutant+ " concentration "+ "is LOWER than the <font color=\"#02d1ff\">national average's</font> by " + Math.abs(differencePercent).toFixed(2) + "%"; 
                         }else{
 
-                              outstring = "<font color=\"#02d1ff\">" + abbrToFull[activeState] + "'s</font> " + activePollutant+ " concentration" + " is HIGHER than the <font color=\"#d67e59\">national average's</font> by " + Math.abs(differencePercent).toFixed(2) + "%"; 
+                              outstring = "<font color=\"#d67e59\">" + abbrToFull[activeState] + "'s</font> " + activePollutant+ " concentration" + " is HIGHER than the <font color=\"#02d1ff\">national average's</font> by " + Math.abs(differencePercent).toFixed(2) + "%"; 
                         }
                         comparison_text.innerHTML = outstring;
                 
