@@ -772,7 +772,7 @@ var draw = async function(){
                 svgChart.selectAll("#avgPoint").remove(); 
                 svgChart.selectAll("#statePoint").remove(); 
                 svgChart.selectAll("#line").remove();
-                comparison_text.innerHTML = "*Mouse over the line graph*";
+                comparison_text.innerHTML = "Mouse over the line graph";
             });
 
 
@@ -812,10 +812,8 @@ var draw = async function(){
     }
 
 
-
     var selectedState = "NY";
 
-    var part1 =document.getElementById('part2map');
     var btns = document.querySelectorAll('.pollutant');
     var inputBox = document.getElementById('state-input');
     var inputMatchResult = document.getElementById('state-input-result');
