@@ -4,6 +4,7 @@ var draw = async function(){
     var activePollutant = 'CO';
     var yUnits = null;
     var avgData = null;
+    var comparison_text = document.getElementById("comparison");
     const sidePadding = 40;
     var yearRange = [2000, 2016];
 
@@ -703,7 +704,7 @@ var draw = async function(){
         //Grab the graphed lines and comparison text
         var avgLine = document.getElementById("avgLine");
         var stateLine  = document.getElementById("stateLine");
-        var comparison_text = document.getElementById("comparison");
+        
        
         svgChart.on("mousemove", function (d) {
                 //Draw a vertical line cursor that follows mouse movement over the line graph
@@ -847,6 +848,7 @@ var draw = async function(){
     for(let i=0;i<btns.length;i++){
         btns[i].onclick = ()=>{
             activePollutant = btns[i].innerHTML;
+            comparison_text.innerHTML = "Mouse over the line graph";
             for(let j=0;j<btns.length;j++){
                 if(btns[j].innerHTML === activePollutant){
                     btns[j].setAttribute('class','pollutant-chosen pollutant');
