@@ -117,21 +117,87 @@ var draw = async function(){
         "WY": "Wyoming"
     };
 
-    var stateValues = [];
-    let id = 1;
+    var stateAbbrList = [];
     for(let stateAbbr in abbrToFull){
-        stateValues.push(stateAbbr);
-        id++;
+        stateAbbrList.push(stateAbbr);
     }
 
     var stateChosen = false;
     var stateFeatures;
     var stateHeader = document.getElementById("state");
-    async function drawMap(){
-        function resizeMap(){
-            mapWidth = (document.body.clientWidth-sidePadding*2)/2-sidePadding/2;
-            mapSvg.attr("width",mapWidth);
+
+    let popByYear = await d3.json('pop_by_year.json');
+
+    var maxPop = 0, minPop = Infinity;
+    for(let year in popByYear){
+        for(let state in popByYear[year]){
+            maxPop = Math.max(popByYear[year][state],maxPop);
+            minPop = Math.min(popByYear[year][state],minPop);
         }
+    }
+    maxPop = Math.ceil(maxPop)+1;
+    minPop = Math.floor(minPop)-1;
+
+    
+    // Draw the US map on the left
+    async function drawMap(){
+        
+
+        //draw legend
+        var legendSvg = d3.select('svg#legend')
+        .attr('width',"500" )
+        .attr('height',"60");
+        
+        legendSvg.append('rect').attr('class','legend-rect')
+        .attr('x',0).attr('y',0).attr('width',500).attr('height',30);
+        legendSvg.append('text').text((maxPop)+'k').attr('x',450).attr('y',50)
+        legendSvg.append('text').text((minPop)+'k').attr('x',0).attr('y',50);
+
+        var triangleData = [[0,0],[500,0],[0,20],[0,0]];
+        legendSvg.append('path')
+        .attr('d',(d3.line()
+            .x(d=>d[0])
+            .y(d=>d[1]))(triangleData))
+        .attr('fill','white');
+
+
+        //input box behavior
+        inputBox.addEventListener('input',(evt)=>{
+            let val = inputBox.value.toLowerCase();
+            showMatchResult(val);
+        })
+
+        function showMatchResult(val){
+            var matchRes = stateAbbrList.filter(e=>(e.toLowerCase().indexOf(val)>-1
+            ||abbrToFull[e].toLowerCase().indexOf(val)>-1));
+            inputMatchResult.innerHTML = '';
+            for(let i=0;i<matchRes.length;i++){
+                var node = document.createElement('div')
+                node.setAttribute('class','state-input-result-item');
+                node.innerHTML = abbrToFull[matchRes[i]];
+                inputMatchResult.appendChild(node);
+                node.addEventListener('click',()=>{
+                    let stateId = '';
+                    for(let id in idToStates){
+                        if(matchRes[i]===idToStates[id]){
+                            stateId = id;
+                            break;
+                        }
+                    }
+                    let d = null;
+                    for(let i=0;i<stateFeatures.length;i++ ){
+                        if(stateId == stateFeatures[i].id){
+                            d = stateFeatures[i];
+                            break;
+                        }
+                    }
+                    onSelectState(d)
+                })
+            }
+        }
+        showMatchResult('');
+
+        //draw US map
 
         mapWidth = (document.body.clientWidth-sidePadding*2)/2-sidePadding/2;
         var mapSvg = d3.select('svg#map')
@@ -159,26 +225,9 @@ var draw = async function(){
                 rgb = d3.rgb(orange.r*t+yellow.r*(1-t), orange.g*t+yellow.g*(1-t),  orange.b*t+yellow.b*(1-t));
             }
             c = d3.color(rgb);
-            
 
             return c;
         })
-
-        var legendSvg = d3.select('svg#legend')
-        .attr('width',"500" )
-        .attr('height',"60");
-        
-        legendSvg.append('rect').attr('class','legend-rect')
-        .attr('x',0).attr('y',0).attr('width',500).attr('height',30);
-        legendSvg.append('text').text((maxPop)+'k').attr('x',450).attr('y',50)
-        legendSvg.append('text').text((minPop)+'k').attr('x',0).attr('y',50);
-
-        var triangleData = [[0,0],[500,0],[0,20],[0,0]];
-        legendSvg.append('path')
-        .attr('d',(d3.line()
-            .x(d=>d[0])
-            .y(d=>d[1]))(triangleData))
-        .attr('fill','white');
 
         var selection = mapSvg.append('g')
         .attr('class','states')
@@ -190,6 +239,20 @@ var draw = async function(){
             return colorScale(d.population)
         });
 
+        var update = enter.append('path')
+        .attr('class','state')
+        .attr('d',path)
+        .on('mouseover',onHoverState)
+        .on('click',onSelectState)
+        .attr('fill',d=>{
+            return colorScale(d.population)
+        });
+
+        mapSvg.append('path')
+        .attr('class','state-borders')
+        .attr('d',path(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; })));
+
+        // draw tooltips
         var clearTooltipTimer = null;
 
         function onSelectState(d){
@@ -223,50 +286,6 @@ var draw = async function(){
             }, 1000);
         }
 
-        inputBox.addEventListener('input',(evt)=>{
-            let val = inputBox.value.toLowerCase();
-            showMatchResult(val);
-        })
-
-        function showMatchResult(val){
-            var matchRes = stateValues.filter(e=>(e.toLowerCase().indexOf(val)>-1
-            ||abbrToFull[e].toLowerCase().indexOf(val)>-1));
-            inputMatchResult.innerHTML = '';
-            for(let i=0;i<matchRes.length;i++){
-                var node = document.createElement('div')
-                node.setAttribute('class','state-input-result-item');
-                node.innerHTML = abbrToFull[matchRes[i]];
-                inputMatchResult.appendChild(node);
-                node.addEventListener('click',()=>{
-                    let stateId = '';
-                    for(let id in idToStates){
-                        if(matchRes[i]===idToStates[id]){
-                            stateId = id;
-                            break;
-                        }
-                    }
-                    let d = null;
-                    for(let i=0;i<stateFeatures.length;i++ ){
-                        if(stateId == stateFeatures[i].id){
-                            d = stateFeatures[i];
-                            break;
-                        }
-                    }
-                    onSelectState(d)
-                })
-            }
-        }
-        showMatchResult('');
-
-        var update = enter.append('path')
-        .attr('class','state')
-        .attr('d',path)
-        .on('mouseover',onHoverState)
-        .on('click',onSelectState)
-        .attr('fill',d=>{
-            return colorScale(d.population)
-        });
-
         var popTooltip = enter.append('rect')
         .attr('class','tooltip')
         .style('opacity',d=>{ if(idToStates[d.id]===selectedState)return '0.3'; return '0'})
@@ -299,6 +318,15 @@ var draw = async function(){
         .on('mouseover',onHoverState)
         .on('click',onSelectState)
         
+
+        //responsively resize map
+        function resizeMap(){
+            mapWidth = (document.body.clientWidth-sidePadding*2)/2-sidePadding/2;
+            mapSvg.attr("width",mapWidth);
+        }
+        window.addEventListener('resize',resizeMap)
+
+        // Expose to the outside so that the map color can be updated externally when year range is changed with slider 
         var updateColor = ()=>{
             update.attr('fill',(d,id)=>{
                 return colorScale(stateFeatures[id].population)
@@ -307,17 +335,12 @@ var draw = async function(){
 
         }
 
-        mapSvg.append('path')
-        .attr('class','state-borders')
-        .attr('d',path(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; })));
-
-        window.addEventListener('resize',resizeMap)
-
         return {
-            selection,updateColor
+            updateColor
         };
     }
 
+    // Draw year range slider on the top
     function drawSlider(){
         var width = document.body.clientWidth-sidePadding*2, height = 80;
         
@@ -352,6 +375,7 @@ var draw = async function(){
         .text(yearRange[0])
         .style('text-anchor','start');
 
+        // change width of slider responsively
         function resizeSlider(){
             width = document.body.clientWidth-sidePadding*2;
             
@@ -435,6 +459,7 @@ var draw = async function(){
         window.addEventListener('resize', resizeSlider)
     }
 
+    // Util function for population data
     function calcAvgPop(yearRange, state){
         let pop = 0;
         let nYear = 0;
@@ -447,6 +472,7 @@ var draw = async function(){
         return pop===0?'NA':Math.floor(pop/nYear);
     }
 
+    // Update pollutant graph by year range
     function updatePopulation(){
         for(let i=0;i<stateFeatures.length;i++){
             let state = idToStates[stateFeatures[i].id]
@@ -466,18 +492,6 @@ var draw = async function(){
         
     }
     
-    let popByYear = await d3.json('pop_by_year.json');
-
-    var maxPop = 0, minPop = Infinity;
-    for(let year in popByYear){
-        for(let state in popByYear[year]){
-            maxPop = Math.max(popByYear[year][state],maxPop);
-            minPop = Math.min(popByYear[year][state],minPop);
-        }
-    }
-    maxPop = Math.ceil(maxPop)+1;
-    minPop = Math.floor(minPop)-1
-    
     var svgChart = d3.select("#bar_chart")
     .attr('height',400)
     .attr('width',1000);
@@ -495,7 +509,7 @@ var draw = async function(){
 
     */
 
-    //Clear the line graph's axes, labels, and lines
+    //Clear pollutant line graph's axes, labels, and lines
     function clearGraph(){
 
         svgChart.selectAll("path.line").remove();
@@ -561,7 +575,7 @@ var draw = async function(){
     }
 
     
-    //Draw the line graphs
+    //Draw the pollutant line graphs
     function drawGraph(activeState, activePollutant){
         clearGraph();
         
@@ -819,7 +833,7 @@ var draw = async function(){
             }
             target = (start + end) / 2
           }
-}
+        }
         // No data for Montana, Mississippi, New Mexico, Vermont, Nebraska
         
 
@@ -829,11 +843,11 @@ var draw = async function(){
     //Default state is NY
     var selectedState = "NY";
 
-    var btns = document.querySelectorAll('.pollutant');
     var inputBox = document.getElementById('state-input');
     var inputMatchResult = document.getElementById('state-input-result');
     
-    
+    // Define pollutant buttons click behaviors
+    var btns = document.querySelectorAll('.pollutant');
     for(let i=0;i<btns.length;i++){
         btns[i].onclick = ()=>{
             activePollutant = btns[i].innerHTML;
